@@ -1,0 +1,77 @@
+import type { AppProps } from 'next/app'
+import Head from 'next/head'
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import '@/styles/globals.css'
+
+export default function App({ Component, pageProps }: AppProps) {
+  const router = useRouter()
+
+  useEffect(() => {
+    // Предотвращаем масштабирование на мобильных
+    const disableZoom = () => {
+      document.addEventListener('gesturestart', (e) => e.preventDefault())
+      document.addEventListener('touchmove', (e) => {
+        if (e.scale !== 1) e.preventDefault()
+      }, { passive: false })
+    }
+    
+    // Улучшаем производительность на мобильных
+    const improvePerformance = () => {
+      // Отключаем контекстное меню на мобильных
+      if ('ontouchstart' in window) {
+        document.addEventListener('contextmenu', (e) => e.preventDefault())
+      }
+    }
+
+    // Обработка смены роута
+    const handleRouteChange = () => {
+      // Можно добавить анимацию перехода
+    }
+
+    disableZoom()
+    improvePerformance()
+    router.events.on('routeChangeComplete', handleRouteChange)
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router])
+
+  return (
+    <>
+      <Head>
+        {/* Мета-теги для мобильных */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+        <meta name="theme-color" content="#0f172a" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="format-detection" content="telephone=no" />
+        
+        {/* SEO оптимизация */}
+        <meta name="description" content="Brain Battle - 38 логических игр в одном приложении. Играйте в шахматы, шашки, судоку и многое другое!" />
+        <meta name="keywords" content="brain games, logic games, puzzles, strategy, mobile games" />
+        <meta property="og:title" content="Brain Battle - 38 Logic Games" />
+        <meta property="og:description" content="Играйте в 38 логических игр в одном приложении!" />
+        <meta property="og:type" content="website" />
+        
+        {/* Иконки */}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        
+        {/* Предзагрузка шрифтов */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Манифест для PWA */}
+        <link rel="manifest" href="/manifest.json" />
+      </Head>
+      
+      {/* Главный контейнер с адаптивностью */}
+      <div className="min-h-screen bg-gray-900 overflow-x-hidden">
+        <Component {...pageProps} />
+      </div>
+    </>
+  )
+}

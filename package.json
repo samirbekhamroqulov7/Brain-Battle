@@ -1,17 +1,60 @@
 {
   "name": "brain-battle",
   "version": "1.0.0",
-  "description": "",
-  "main": "game.js",
+  "private": true,
+  "description": "Brain Battle - 20 логических игр в одном приложении",
+  "author": "Brain Battle Team",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "analyze": "ANALYZE=true next build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0",
-    "socket.io": "^4.8.1"
-  }
+    "clsx": "^2.0.0",
+    "critters": "^0.0.23",
+    "framer-motion": "^10.16.0",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.0.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.4.0",
+    "prettier": "^3.0.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "brain-games",
+    "logic-games",
+    "puzzle",
+    "strategy",
+    "educational",
+    "multiplayer"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/brain-battle"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/brain-battle/issues"
+  },
+  "homepage": "https://brain-battle.vercel.app"
 }

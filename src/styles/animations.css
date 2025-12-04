@@ -1,0 +1,407 @@
+/* ==================== КАСТОМНЫЕ АНИМАЦИИ ДЛЯ ИГР ==================== */
+
+/* Анимация для появления элементов игрового поля */
+@keyframes cell-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  70% {
+    transform: scale(1.05) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Анимация для исчезновения элементов */
+@keyframes cell-disappear {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Анимация для победы */
+@keyframes victory-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+/* Анимация для поражения */
+@keyframes defeat-shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* Анимация для хода игрока */
+@keyframes player-turn {
+  0% {
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    border-color: rgba(6, 182, 212, 0.7);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.7);
+  }
+  100% {
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+  }
+}
+
+/* Анимация для таймера */
+@keyframes timer-warning {
+  0%, 100% {
+    color: #ffffff;
+  }
+  50% {
+    color: #f87171;
+  }
+}
+
+@keyframes timer-critical {
+  0%, 100% {
+    color: #f87171;
+    text-shadow: 0 0 10px rgba(248, 113, 113, 0.7);
+  }
+  50% {
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(248, 113, 113, 1);
+  }
+}
+
+/* Анимация для подсказок */
+@keyframes hint-pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Анимация для загрузки игр */
+@keyframes game-loading {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+/* Анимация для звездного неба (фон) */
+@keyframes star-twinkle {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes star-drift {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(-100px) translateX(20px);
+  }
+}
+
+/* Анимация для частиц */
+@keyframes particle-explode {
+  0% {
+    opacity: 0;
+    transform: scale(0) translate(0, 0);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) translate(var(--tx), var(--ty));
+  }
+}
+
+/* Анимация для combo-эффектов */
+@keyframes combo-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Анимация для текстовых эффектов */
+@keyframes text-glow {
+  0%, 100% {
+    text-shadow: 0 0 10px currentColor;
+  }
+  50% {
+    text-shadow: 0 0 20px currentColor, 0 0 30px currentColor;
+  }
+}
+
+/* Анимация для вращения (для Пентаго) */
+@keyframes rotate-quadrant {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes rotate-quadrant-reverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
+/* Анимация для линии (Точки и квадраты) */
+@keyframes line-draw {
+  0% {
+    width: 0%;
+    height: 0%;
+  }
+  100% {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Анимация для захвата квадрата */
+@keyframes box-capture {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Анимация для всплывающих уведомлений */
+@keyframes notification-slide {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  90% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Анимация для волн (эффект воды) */
+@keyframes wave {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-25%) translateY(5%);
+  }
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ==================== КЛАССЫ АНИМАЦИЙ ==================== */
+
+.animate-cell-appear {
+  animation: cell-appear 0.4s ease-out forwards;
+}
+
+.animate-cell-disappear {
+  animation: cell-disappear 0.3s ease-out forwards;
+}
+
+.animate-victory-pulse {
+  animation: victory-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-defeat-shake {
+  animation: defeat-shake 0.5s ease-in-out forwards;
+}
+
+.animate-player-turn {
+  animation: player-turn 2s ease-in-out infinite;
+}
+
+.animate-timer-warning {
+  animation: timer-warning 1s ease-in-out infinite;
+}
+
+.animate-timer-critical {
+  animation: timer-critical 0.5s ease-in-out infinite;
+}
+
+.animate-hint-pulse {
+  animation: hint-pulse 1.5s ease-in-out infinite;
+}
+
+.animate-game-loading {
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: game-loading 2s linear infinite;
+}
+
+.animate-star-twinkle {
+  animation: star-twinkle 3s ease-in-out infinite;
+}
+
+.animate-star-drift {
+  animation: star-drift 20s linear infinite;
+}
+
+.animate-particle-explode {
+  animation: particle-explode 1s ease-out forwards;
+}
+
+.animate-combo-pop {
+  animation: combo-pop 0.5s ease-out forwards;
+}
+
+.animate-text-glow {
+  animation: text-glow 2s ease-in-out infinite;
+}
+
+.animate-rotate-quadrant {
+  animation: rotate-quadrant 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-rotate-quadrant-reverse {
+  animation: rotate-quadrant-reverse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-line-draw {
+  animation: line-draw 0.3s ease-out forwards;
+}
+
+.animate-box-capture {
+  animation: box-capture 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
+
+.animate-notification-slide {
+  animation: notification-slide 3s ease-in-out forwards;
+}
+
+.animate-wave {
+  animation: wave 20s linear infinite;
+}
+
+/* ==================== АНИМАЦИИ ДЛЯ КОНКРЕТНЫХ ИГР ==================== */
+
+/* Шахматы */
+.animate-chess-move {
+  animation: cell-appear 0.3s ease-out;
+}
+
+.animate-chess-capture {
+  animation: defeat-shake 0.4s ease-out;
+}
+
+/* Математический спринт */
+.animate-math-correct {
+  animation: victory-pulse 0.5s ease-out;
+}
+
+.animate-math-wrong {
+  animation: defeat-shake 0.3s ease-out;
+}
+
+.animate-math-new-problem {
+  animation: cell-appear 0.4s ease-out;
+}
+
+/* Судоку */
+.animate-sudoku-hint {
+  animation: hint-pulse 1s ease-in-out infinite;
+}
+
+.animate-sudoku-error {
+  animation: defeat-shake 0.3s ease-out;
+}
+
+/* Пятнашки */
+.animate-slide-tile {
+  animation: cell-appear 0.2s ease-out;
+}
+
+.animate-tile-solved {
+  animation: victory-pulse 1s ease-in-out;
+}
+
+/* ==================== УТИЛИТЫ ДЛЯ АНИМАЦИЙ ==================== */
+
+.animation-pause {
+  animation-play-state: paused;
+}
+
+.animation-play {
+  animation-play-state: running;
+}
+
+.animation-fill-forwards {
+  animation-fill-mode: forwards;
+}
+
+.animation-fill-backwards {
+  animation-fill-mode: backwards;
+}
+
+.animation-fill-both {
+  animation-fill-mode: both;
+}
+
+/* ==================== МЕДИА-ЗАПРОСЫ ДЛЯ АНИМАЦИЙ ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .no-motion {
+    animation: none !important;
+    transition: none !important;
+  }
+}

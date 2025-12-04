@@ -1,1 +1,60 @@
-node_modules/ 
+# Депенденсии
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Тестирование
+coverage/
+
+# Продакшн
+.next/
+out/
+dist/
+
+# Переменные окружения
+.env*.local
+.env
+
+# Логи
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Системные файлы
+.DS_Store
+*.pem
+Thumbs.db
+
+# Временные файлы
+tmp/
+temp/
+*.tmp
+
+# Локальные настройки
+*.local
+
+# Документация
+docs/
+storybook-static/
+
+# Пакеты
+*.tgz
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+
+# Библиотеки
+/lib/
+/es/
+/umd/

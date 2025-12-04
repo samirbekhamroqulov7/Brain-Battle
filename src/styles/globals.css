@@ -1,0 +1,729 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================== ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ ==================== */
+:root {
+  --primary-color: #8b5cf6;
+  --secondary-color: #ec4899;
+  --accent-color: #06b6d4;
+  --bg-dark: #0f172a;
+  --bg-darker: #020617;
+}
+
+/* ==================== БАЗОВЫЕ СТИЛИ ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-darker);
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* ==================== КАСТОМНЫЕ УТИЛИТЫ TAILWIND ==================== */
+@layer utilities {
+  /* Анимации задержки */
+  .animation-delay-200 {
+    animation-delay: 0.2s;
+  }
+  .animation-delay-500 {
+    animation-delay: 0.5s;
+  }
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  /* Градиентный текст */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r;
+  }
+  
+  /* Скрытие скроллбара */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  /* Плавные переходы */
+  .transition-all-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  /* Блюр фон */
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
+  }
+  
+  /* Стили для выделения */
+  .highlight {
+    @apply relative;
+  }
+  .highlight::after {
+    content: '';
+    @apply absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full;
+  }
+}
+
+/* ==================== КАСТОМНЫЕ АНИМАЦИИ ==================== */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes particle-float {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Классы анимаций */
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.5s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.4s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-blink {
+  animation: blink 1s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background-size: 1000px 100%;
+}
+
+/* ==================== КАСТОМНЫЕ КОМПОНЕНТЫ ==================== */
+@layer components {
+  /* Кнопки */
+  .btn-primary {
+    @apply px-6 py-3 rounded-full font-bold transition-all duration-300
+           bg-gradient-to-r from-purple-600 to-pink-600 
+           hover:from-purple-700 hover:to-pink-700
+           hover:shadow-lg hover:shadow-purple-500/30
+           active:scale-95
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 rounded-full font-bold transition-all duration-300
+           bg-gradient-to-r from-cyan-600 to-blue-600 
+           hover:from-cyan-700 hover:to-blue-700
+           hover:shadow-lg hover:shadow-cyan-500/30
+           active:scale-95;
+  }
+  
+  .btn-ghost {
+    @apply px-6 py-3 rounded-full font-bold transition-all duration-300
+           bg-white/5 hover:bg-white/10
+           border border-white/10 hover:border-white/20
+           active:scale-95;
+  }
+  
+  /* Карточки */
+  .card-glass {
+    @apply backdrop-blur-lg bg-white/5 border border-white/10
+           rounded-2xl shadow-xl transition-all duration-300
+           hover:border-white/20 hover:shadow-2xl;
+  }
+  
+  .card-gradient {
+    @apply rounded-2xl shadow-xl transition-all duration-300
+           bg-gradient-to-br from-gray-800/50 to-gray-900/50
+           border border-white/10 hover:border-white/20;
+  }
+  
+  /* Инпуты */
+  .input-primary {
+    @apply w-full p-4 rounded-xl bg-white/5 border border-white/10
+           text-white placeholder-gray-500
+           focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20
+           transition-all duration-300;
+  }
+  
+  /* Баджи */
+  .badge-primary {
+    @apply px-3 py-1 rounded-full text-xs font-medium
+           bg-gradient-to-r from-purple-500/20 to-pink-500/20
+           text-purple-300 border border-purple-500/30;
+  }
+  
+  .badge-secondary {
+    @apply px-3 py-1 rounded-full text-xs font-medium
+           bg-gradient-to-r from-cyan-500/20 to-blue-500/20
+           text-cyan-300 border border-cyan-500/30;
+  }
+  
+  /* Прогресс-бары */
+  .progress-bar {
+    @apply w-full h-2 bg-gray-800 rounded-full overflow-hidden;
+  }
+  
+  .progress-fill {
+    @apply h-full bg-gradient-to-r from-cyan-500 to-purple-500
+           transition-all duration-500;
+  }
+}
+
+/* ==================== СТИЛИ ДЛЯ ИГР ==================== */
+/* Пентаго */
+.pentago-cell {
+  @apply w-16 h-16 rounded-lg flex items-center justify-center
+         bg-white/5 border border-white/10
+         transition-all duration-200;
+}
+
+.pentago-cell:hover:not(.occupied) {
+  @apply bg-white/10 scale-105;
+}
+
+/* Точки и квадраты */
+.dots-grid {
+  @apply relative;
+}
+
+.dots-line {
+  @apply absolute bg-gray-700 transition-all duration-200;
+}
+
+.dots-line:hover:not(.drawn) {
+  @apply bg-gray-600 scale-110;
+}
+
+.dots-line.drawn {
+  @apply cursor-default;
+}
+
+/* Шахматы */
+.chess-square {
+  @apply w-12 h-12 md:w-16 md:h-16 flex items-center justify-center;
+}
+
+.chess-square-light {
+  @apply bg-gradient-to-br from-amber-100 to-amber-50;
+}
+
+.chess-square-dark {
+  @apply bg-gradient-to-br from-amber-800 to-amber-900;
+}
+
+.chess-square-highlight {
+  @apply ring-4 ring-green-500/50 ring-offset-2;
+}
+
+/* Математический спринт */
+.math-problem {
+  @apply text-4xl md:text-5xl font-bold text-center
+         bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent;
+}
+
+.math-option {
+  @apply p-6 rounded-2xl text-2xl font-bold
+         bg-gradient-to-br from-gray-800 to-gray-900
+         border border-white/10 hover:border-cyan-500/50
+         hover:shadow-lg hover:shadow-cyan-500/20
+         transition-all duration-300 active:scale-95;
+}
+
+/* ==================== СТИЛИ ДЛЯ СКРОЛЛБАРА ==================== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-900/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gradient-to-br from-purple-600 to-pink-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply from-purple-700 to-pink-700;
+}
+
+/* ==================== СТИЛИ ДЛЯ ВЫДЕЛЕНИЯ ТЕКСТА ==================== */
+::selection {
+  @apply bg-purple-500/30 text-white;
+}
+
+::-moz-selection {
+  @apply bg-purple-500/30 text-white;
+}
+
+/* ==================== СТИЛИ ДЛЯ ФОКУСА ==================== */
+:focus-visible {
+  @apply outline-none ring-2 ring-purple-500 ring-offset-2 ring-offset-gray-900;
+}
+
+/* ==================== СТИЛИ ДЛЯ ПОРТРЕТНОЙ ОРИЕНТАЦИИ ==================== */
+@media (orientation: portrait) and (max-width: 768px) {
+  .portrait-warning {
+    @apply fixed inset-0 z-50 flex flex-col items-center justify-center
+           bg-gray-900 p-4 text-center;
+  }
+}
+
+/* ==================== СТИЛИ ДЛЯ ПЕЧАТИ ==================== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ==================== СТИЛИ ДЛЯ ПРЕЛОАДЕРА ==================== */
+.loader-spinner {
+  @apply w-12 h-12 border-4 border-gray-700 border-t-purple-500 rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==================== СТИЛИ ДЛЯ ТУЛТИПОВ ==================== */
+.tooltip {
+  @apply relative;
+}
+
+.tooltip-text {
+  @apply invisible absolute z-50 px-3 py-2 rounded-lg bg-gray-900/95 
+         backdrop-blur-lg text-white text-sm whitespace-nowrap
+         border border-white/10 shadow-xl;
+  transform: translateX(-50%);
+  left: 50%;
+  bottom: 125%;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible;
+}
+
+/* ==================== СТИЛИ ДЛЯ ЗВЕЗДНОГО ФОНА ==================== */
+.stars-bg {
+  background: 
+    radial-gradient(ellipse at top, rgba(139, 92, 246, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse at bottom, rgba(236, 72, 153, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse at center, rgba(6, 182, 212, 0.05) 0%, transparent 70%),
+    var(--bg-darker);
+}
+
+/* ==================== СТИЛИ ДЛЯ КОНЕЦА СТРАНИЦЫ ==================== */
+.end-of-content {
+  @apply text-center py-12 text-gray-500 text-sm;
+  position: relative;
+}
+
+.end-of-content::before {
+  content: '';
+  @apply absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent;
+  transform: translateY(-50%);
+}
+
+/* ==================== СТИЛИ ДЛЯ АДАПТИВНОСТИ ==================== */
+@media (max-width: 640px) {
+  .mobile-stack {
+    @apply flex-col space-y-4;
+  }
+  
+  .mobile-center {
+    @apply text-center justify-center;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+}
+
+/* ==================== СТИЛИ ДЛЯ ПРЕДЗАГРУЗКИ ИЗОБРАЖЕНИЙ ==================== */
+.image-preload {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==================== СТИЛИ ДЛЯ АНИМАЦИИ ПОЯВЛЕНИЯ ==================== */
+.stagger-animation > * {
+  opacity: 0;
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* ==================== СТИЛИ ДЛЯ ЭФФЕКТОВ ==================== */
+.glow-effect {
+  filter: drop-shadow(0 0 20px currentColor);
+}
+
+.blur-effect {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ==================== СТИЛИ ДЛЯ ВЫХОДНЫХ КЛАССОВ ==================== */
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+}
+
+.word-break-keep {
+  word-break: keep-all;
+}
+/* ==================== МОБИЛЬНЫЕ СТИЛИ ==================== */
+
+/* Стили для тач-устройств */
+@media (hover: none) and (pointer: coarse) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    min-height: 44px; /* Минимальный размер для touch */
+    padding: 12px 24px;
+  }
+  
+  .input-primary {
+    font-size: 16px; /* Предотвращает zoom в iOS */
+  }
+  
+  /* Увеличиваем тач-таргеты */
+  .touch-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Портретная ориентация */
+@media (orientation: portrait) {
+  .portrait-hide {
+    display: none !important;
+  }
+  
+  .game-board {
+    max-width: 100vw !important;
+    max-height: 70vh !important;
+  }
+}
+
+/* Ландшафтная ориентация */
+@media (orientation: landscape) and (max-height: 600px) {
+  .landscape-compact {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  
+  .game-board {
+    max-height: 80vh !important;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 320px) {
+  .text-xs-320 {
+    font-size: 0.625rem !important;
+  }
+  
+  .p-320 {
+    padding: 0.5rem !important;
+  }
+}
+
+/* Планшеты */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Предотвращение синего выделения на тап в мобильных */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Улучшение скролла на мобильных */
+@media (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Стили для notch и безопасных зон */
+@supports (padding: max(0px)) {
+  .safe-padding {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-top: max(0.75rem, env(safe-area-inset-top));
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-margin {
+    margin-left: max(0.75rem, env(safe-area-inset-left));
+    margin-right: max(0.75rem, env(safe-area-inset-right));
+    margin-top: max(0.75rem, env(safe-area-inset-top));
+    margin-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Оптимизация анимаций для мобильных */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Темная тема по умолчанию */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* ==================== УТИЛИТЫ ДЛЯ ИГР ==================== */
+
+/* Адаптивные игровые доски */
+.responsive-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100px, 100%), 1fr));
+}
+
+/* Карточки игр на мобильных */
+@media (max-width: 640px) {
+  .game-card {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .game-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Игровые контролы для мобильных */
+.mobile-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  z-index: 100;
+}
+
+/* Swipe-навигация */
+.swipe-area {
+  position: relative;
+  overflow: hidden;
+}
+
+.swipe-content {
+  transition: transform 0.3s ease;
+}
+
+/* Оптимизация изображений */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Отключение выделения на мобильных */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Улучшение производительности */
+.will-change-transform {
+  will-change: transform;
+}
+
+/* ==================== КОНЕЦ МОБИЛЬНЫХ СТИЛЕЙ ==================== */
+
+/* ==================== КОНЕЦ СТИЛЕЙ ==================== */ 
+/* ========== ��������� ����������� (����������) ========== */ 
+@media (max-width: 768px) { 
+  .mobile-hide { display: none !important; } 
+  .mobile-block { display: block !important; } 
+  .mobile-flex { display: flex !important; } 
+  .mobile-text-center { text-align: center !important; } 
+  .mobile-full { width: 100% !important; } 
+} 
+ 
+/* ����襭�� touch-ᮡ�⨩ */ 
+@media (hover: none) and (pointer: coarse) { 
+  button, a, [role="button"] { min-height: 44px; } 
+  input, select, textarea { font-size: 16px; } 
+} 
+ 
+/* �������� ���� ��� iPhone */ 
+@supports (padding: max(0px)) { 
+  .safe-area-padding { 
+    padding-left: max(1rem, env(safe-area-inset-left)); 
+    padding-right: max(1rem, env(safe-area-inset-right)); 
+    padding-top: max(1rem, env(safe-area-inset-top)); 
+    padding-bottom: max(1rem, env(safe-area-inset-bottom)); 
+  } 
+} 

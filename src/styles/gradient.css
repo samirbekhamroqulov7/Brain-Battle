@@ -1,0 +1,651 @@
+/* ==================== КАСТОМНЫЕ ГРАДИЕНТЫ ДЛЯ BRAIN BATTLE ==================== */
+
+/* Основные градиенты для темы */
+.gradient-primary {
+  background: linear-gradient(135deg, 
+    #8b5cf6 0%, 
+    #7c3aed 25%, 
+    #6d28d9 50%, 
+    #5b21b6 75%, 
+    #4c1d95 100%
+  );
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg,
+    #ec4899 0%,
+    #db2777 25%,
+    #be185d 50%,
+    #9d174d 75%,
+    #831843 100%
+  );
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg,
+    #06b6d4 0%,
+    #0891b2 25%,
+    #0e7490 50%,
+    #155e75 75%,
+    #164e63 100%
+  );
+}
+
+/* Фоновые градиенты для страниц */
+.gradient-background {
+  background: linear-gradient(135deg,
+    #0f172a 0%,
+    #1e293b 25%,
+    #334155 50%,
+    #475569 75%,
+    #64748b 100%
+  );
+}
+
+.gradient-background-dark {
+  background: linear-gradient(135deg,
+    #020617 0%,
+    #0f172a 25%,
+    #1e293b 50%,
+    #334155 75%,
+    #475569 100%
+  );
+}
+
+.gradient-background-light {
+  background: linear-gradient(135deg,
+    #f8fafc 0%,
+    #f1f5f9 25%,
+    #e2e8f0 50%,
+    #cbd5e1 75%,
+    #94a3b8 100%
+  );
+}
+
+/* Градиенты для игр по категориям */
+.gradient-game-puzzle {
+  background: linear-gradient(135deg,
+    #a855f7 0%,
+    #9333ea 33%,
+    #7c3aed 66%,
+    #6d28d9 100%
+  );
+}
+
+.gradient-game-strategy {
+  background: linear-gradient(135deg,
+    #3b82f6 0%,
+    #2563eb 33%,
+    #1d4ed8 66%,
+    #1e40af 100%
+  );
+}
+
+.gradient-game-math {
+  background: linear-gradient(135deg,
+    #10b981 0%,
+    #059669 33%,
+    #047857 66%,
+    #065f46 100%
+  );
+}
+
+.gradient-game-words {
+  background: linear-gradient(135deg,
+    #f59e0b 0%,
+    #d97706 33%,
+    #b45309 66%,
+    #92400e 100%
+  );
+}
+
+.gradient-game-logic {
+  background: linear-gradient(135deg,
+    #06b6d4 0%,
+    #0891b2 33%,
+    #0e7490 66%,
+    #155e75 100%
+  );
+}
+
+/* Градиенты для рангов игроков */
+.gradient-rank-novice {
+  background: linear-gradient(135deg,
+    #6b7280 0%,
+    #4b5563 50%,
+    #374151 100%
+  );
+}
+
+.gradient-rank-apprentice {
+  background: linear-gradient(135deg,
+    #10b981 0%,
+    #059669 50%,
+    #047857 100%
+  );
+}
+
+.gradient-rank-specialist {
+  background: linear-gradient(135deg,
+    #3b82f6 0%,
+    #2563eb 50%,
+    #1d4ed8 100%
+  );
+}
+
+.gradient-rank-expert {
+  background: linear-gradient(135deg,
+    #8b5cf6 0%,
+    #7c3aed 50%,
+    #6d28d9 100%
+  );
+}
+
+.gradient-rank-master {
+  background: linear-gradient(135deg,
+    #f59e0b 0%,
+    #d97706 50%,
+    #b45309 100%
+  );
+}
+
+.gradient-rank-grandmaster {
+  background: linear-gradient(135deg,
+    #ef4444 0%,
+    #dc2626 50%,
+    #b91c1c 100%
+  );
+}
+
+/* Градиенты для состояний игры */
+.gradient-game-waiting {
+  background: linear-gradient(135deg,
+    #6b7280 0%,
+    #4b5563 33%,
+    #374151 66%,
+    #1f2937 100%
+  );
+}
+
+.gradient-game-playing {
+  background: linear-gradient(135deg,
+    #10b981 0%,
+    #059669 33%,
+    #047857 66%,
+    #065f46 100%
+  );
+}
+
+.gradient-game-paused {
+  background: linear-gradient(135deg,
+    #f59e0b 0%,
+    #d97706 33%,
+    #b45309 66%,
+    #92400e 100%
+  );
+}
+
+.gradient-game-finished {
+  background: linear-gradient(135deg,
+    #8b5cf6 0%,
+    #7c3aed 33%,
+    #6d28d9 66%,
+    #5b21b6 100%
+  );
+}
+
+/* Градиенты для кнопок */
+.gradient-button-primary {
+  background: linear-gradient(135deg,
+    #8b5cf6 0%,
+    #7c3aed 33%,
+    #6d28d9 66%,
+    #5b21b6 100%
+  );
+}
+
+.gradient-button-secondary {
+  background: linear-gradient(135deg,
+    #06b6d4 0%,
+    #0891b2 33%,
+    #0e7490 66%,
+    #155e75 100%
+  );
+}
+
+.gradient-button-success {
+  background: linear-gradient(135deg,
+    #10b981 0%,
+    #059669 33%,
+    #047857 66%,
+    #065f46 100%
+  );
+}
+
+.gradient-button-warning {
+  background: linear-gradient(135deg,
+    #f59e0b 0%,
+    #d97706 33%,
+    #b45309 66%,
+    #92400e 100%
+  );
+}
+
+.gradient-button-danger {
+  background: linear-gradient(135deg,
+    #ef4444 0%,
+    #dc2626 33%,
+    #b91c1c 66%,
+    #991b1b 100%
+  );
+}
+
+/* Градиенты для карточек */
+.gradient-card-default {
+  background: linear-gradient(135deg,
+    rgba(30, 41, 59, 0.8) 0%,
+    rgba(15, 23, 42, 0.8) 100%
+  );
+}
+
+.gradient-card-hover {
+  background: linear-gradient(135deg,
+    rgba(51, 65, 85, 0.8) 0%,
+    rgba(30, 41, 59, 0.8) 100%
+  );
+}
+
+.gradient-card-selected {
+  background: linear-gradient(135deg,
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(124, 58, 237, 0.2) 50%,
+    rgba(109, 40, 217, 0.2) 100%
+  );
+}
+
+/* Градиенты для эффектов */
+.gradient-glow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(139, 92, 246, 0.3) 0%,
+    rgba(139, 92, 246, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.gradient-glow-accent {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(6, 182, 212, 0.3) 0%,
+    rgba(6, 182, 212, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.gradient-glow-success {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(16, 185, 129, 0.3) 0%,
+    rgba(16, 185, 129, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+/* Градиенты для текста */
+.text-gradient-primary {
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-secondary {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, #10b981, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-rainbow {
+  background: linear-gradient(135deg,
+    #ef4444 0%,
+    #f59e0b 20%,
+    #10b981 40%,
+    #06b6d4 60%,
+    #3b82f6 80%,
+    #8b5cf6 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Градиенты для границ */
+.border-gradient-primary {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+              linear-gradient(135deg, #8b5cf6, #ec4899) border-box;
+}
+
+.border-gradient-secondary {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+              linear-gradient(135deg, #06b6d4, #3b82f6) border-box;
+}
+
+.border-gradient-accent {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--bg-dark), var(--bg-dark)) padding-box,
+              linear-gradient(135deg, #10b981, #f59e0b) border-box;
+}
+
+/* Градиенты для прогресс-баров */
+.gradient-progress-default {
+  background: linear-gradient(90deg,
+    #3b82f6 0%,
+    #06b6d4 33%,
+    #10b981 66%,
+    #f59e0b 100%
+  );
+}
+
+.gradient-progress-health {
+  background: linear-gradient(90deg,
+    #ef4444 0%,
+    #f59e0b 33%,
+    #10b981 66%,
+    #10b981 100%
+  );
+}
+
+.gradient-progress-experience {
+  background: linear-gradient(90deg,
+    #8b5cf6 0%,
+    #7c3aed 33%,
+    #6d28d9 66%,
+    #5b21b6 100%
+  );
+}
+
+/* Анимированные градиенты */
+.gradient-animated-primary {
+  background: linear-gradient(135deg,
+    #8b5cf6 0%,
+    #7c3aed 25%,
+    #6d28d9 50%,
+    #5b21b6 75%,
+    #4c1d95 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+.gradient-animated-secondary {
+  background: linear-gradient(135deg,
+    #ec4899 0%,
+    #db2777 25%,
+    #be185d 50%,
+    #9d174d 75%,
+    #831843 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+.gradient-animated-accent {
+  background: linear-gradient(135deg,
+    #06b6d4 0%,
+    #0891b2 25%,
+    #0e7490 50%,
+    #155e75 75%,
+    #164e63 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Градиенты для конкретных игр */
+.gradient-pentago-board {
+  background: linear-gradient(135deg,
+    #0f172a 0%,
+    #1e293b 25%,
+    #8b5cf6 50%,
+    #ec4899 75%,
+    #0f172a 100%
+  );
+}
+
+.gradient-dots-board {
+  background: linear-gradient(135deg,
+    #0f172a 0%,
+    #1e293b 25%,
+    #10b981 50%,
+    #06b6d4 75%,
+    #0f172a 100%
+  );
+}
+
+.gradient-chess-board {
+  background: linear-gradient(135deg,
+    #0f172a 0%,
+    #1e293b 25%,
+    #f59e0b 50%,
+    #92400e 75%,
+    #0f172a 100%
+  );
+}
+
+.gradient-math-board {
+  background: linear-gradient(135deg,
+    #0f172a 0%,
+    #1e293b 25%,
+    #3b82f6 50%,
+    #1d4ed8 75%,
+    #0f172a 100%
+  );
+}
+
+/* Градиенты для режимов игры */
+.gradient-mode-classic {
+  background: linear-gradient(135deg,
+    #6b7280 0%,
+    #4b5563 33%,
+    #374151 66%,
+    #1f2937 100%
+  );
+}
+
+.gradient-mode-pvp {
+  background: linear-gradient(135deg,
+    #ef4444 0%,
+    #dc2626 33%,
+    #b91c1c 66%,
+    #991b1b 100%
+  );
+}
+
+.gradient-mode-ai {
+  background: linear-gradient(135deg,
+    #06b6d4 0%,
+    #0891b2 33%,
+    #0e7490 66%,
+    #155e75 100%
+  );
+}
+
+/* Градиенты для уровней сложности */
+.gradient-difficulty-1 {
+  background: linear-gradient(135deg,
+    #10b981 0%,
+    #059669 100%
+  );
+}
+
+.gradient-difficulty-2 {
+  background: linear-gradient(135deg,
+    #3b82f6 0%,
+    #1d4ed8 100%
+  );
+}
+
+.gradient-difficulty-3 {
+  background: linear-gradient(135deg,
+    #8b5cf6 0%,
+    #6d28d9 100%
+  );
+}
+
+.gradient-difficulty-4 {
+  background: linear-gradient(135deg,
+    #f59e0b 0%,
+    #b45309 100%
+  );
+}
+
+.gradient-difficulty-5 {
+  background: linear-gradient(135deg,
+    #ef4444 0%,
+    #b91c1c 100%
+  );
+}
+
+/* Градиенты для времени суток */
+.gradient-time-morning {
+  background: linear-gradient(135deg,
+    #fde68a 0%,
+    #fbbf24 33%,
+    #f59e0b 66%,
+    #d97706 100%
+  );
+}
+
+.gradient-time-day {
+  background: linear-gradient(135deg,
+    #38bdf8 0%,
+    #0ea5e9 33%,
+    #0284c7 66%,
+    #0369a1 100%
+  );
+}
+
+.gradient-time-evening {
+  background: linear-gradient(135deg,
+    #c084fc 0%,
+    #a855f7 33%,
+    #9333ea 66%,
+    #7c3aed 100%
+  );
+}
+
+.gradient-time-night {
+  background: linear-gradient(135deg,
+    #1e293b 0%,
+    #0f172a 33%,
+    #020617 66%,
+    #000000 100%
+  );
+}
+
+/* Утилитарные классы для градиентов */
+.gradient-transparent {
+  background: linear-gradient(135deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+}
+
+.gradient-overlay {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+}
+
+.gradient-underlay {
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.8) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    transparent 100%
+  );
+}
+
+/* Градиенты для состояний элементов */
+.gradient-disabled {
+  background: linear-gradient(135deg,
+    #6b7280 0%,
+    #4b5563 50%,
+    #374151 100%
+  );
+  opacity: 0.5;
+}
+
+.gradient-hover:hover {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+}
+
+.gradient-active:active {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+}
+
+/* Градиенты для отзывчивости */
+@media (max-width: 768px) {
+  .gradient-mobile-primary {
+    background: linear-gradient(135deg,
+      #8b5cf6 0%,
+      #6d28d9 100%
+    );
+  }
+  
+  .gradient-mobile-secondary {
+    background: linear-gradient(135deg,
+      #06b6d4 0%,
+      #0e7490 100%
+    );
+  }
+}
+
+/* Градиенты для темной/светлой темы */
+@media (prefers-color-scheme: dark) {
+  .gradient-theme-aware {
+    background: linear-gradient(135deg,
+      #1e293b 0%,
+      #0f172a 100%
+    );
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .gradient-theme-aware {
+    background: linear-gradient(135deg,
+      #f8fafc 0%,
+      #f1f5f9 100%
+    );
+  }
+}
