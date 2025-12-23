@@ -136,13 +136,41 @@ export const useUser = () => {
               console.error("[v0] Session restoration failed:", error)
               localStorage.removeItem("brain_battle_session")
               localStorage.removeItem("brain_battle_auto_login")
+              setLoading(false)
+              return
             } else if (restoredSession) {
               console.log("[v0] Session restored successfully")
             }
           } catch (error) {
             console.error("[v0] Session parsing error:", error)
             localStorage.removeItem("brain_battle_session")
+            setLoading(false)
+            return
           }
+        } else {
+          const guestMode = localStorage.getItem("brain_battle_guest_mode")
+          if (guestMode === "true") {
+            const guestProfile = localStorage.getItem("brain_battle_guest_profile")
+            if (guestProfile) {
+              try {
+                const parsedProfile = JSON.parse(guestProfile)
+                setProfile(parsedProfile)
+                const tempUser = {
+                  id: parsedProfile.auth_id,
+                  email: parsedProfile.email,
+                  user_metadata: { is_guest: true },
+                  app_metadata: {},
+                  aud: "authenticated",
+                  created_at: parsedProfile.created_at,
+                } as User
+                setUser(tempUser)
+              } catch {
+                // Silent error handling
+              }
+            }
+          }
+          setLoading(false)
+          return
         }
       }
 
@@ -150,26 +178,39 @@ export const useUser = () => {
         data: { user: authUser },
       } = await supabase.auth.getUser()
 
-      if (authUser) {
-        console.log("[v0] User authenticated:", authUser.id)
-        setUser(authUser)
+      if (!authUser) {
+        console.log("[v0] No authenticated user")
+        setUser(null)
+        setProfile(null)
+        setMastery(null)
+        setGlory(null)
+        setLoading(false)
+        return
+      }
 
-        const {
-          data: { session: currentSession },
-        } = await supabase.auth.getSession()
+      console.log("[v0] User authenticated:", authUser.id)
+      setUser(authUser)
 
-        if (currentSession) {
-          localStorage.setItem(
-            "brain_battle_session",
-            JSON.stringify({
-              access_token: currentSession.access_token,
-              refresh_token: currentSession.refresh_token,
-              expires_at: currentSession.expires_at,
-            }),
-          )
-        }
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession()
 
-        const { data: profileData, error: profileError } = await supabase
+      if (currentSession) {
+        localStorage.setItem(
+          "brain_battle_session",
+          JSON.stringify({
+            access_token: currentSession.access_token,
+            refresh_token: currentSession.refresh_token,
+            expires_at: currentSession.expires_at,
+          }),
+        )
+      }
+
+      let retries = 0
+      let profileData = null
+
+      while (retries < 3 && !profileData) {
+        const { data, error: profileError } = await supabase
           .from("users")
           .select("*")
           .eq("auth_id", authUser.id)
@@ -179,84 +220,67 @@ export const useUser = () => {
           console.error("[v0] Profile fetch error:", profileError)
         }
 
-        if (profileData) {
-          console.log("[v0] Profile loaded:", profileData.id)
-          setProfile(profileData)
+        if (data) {
+          profileData = data
+          break
+        }
 
-          if (!profileData.isGuest) {
+        if (retries < 2) {
+          console.log(`[v0] Profile not found, retry ${retries + 1}/3`)
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        }
+        retries++
+      }
+
+      if (profileData) {
+        console.log("[v0] Profile loaded:", profileData.id)
+        setProfile(profileData)
+
+        if (!profileData.isGuest) {
+          const { data: masteryData } = await supabase
+            .from("mastery")
+            .select("*")
+            .eq("user_id", profileData.id)
+            .maybeSingle()
+
+          if (masteryData) {
+            console.log("[v0] Mastery loaded")
+            setMastery(masteryData)
+          }
+
+          const { data: gloryData } = await supabase
+            .from("glory")
+            .select("*")
+            .eq("user_id", profileData.id)
+            .maybeSingle()
+
+          if (gloryData) {
+            console.log("[v0] Glory loaded")
+            setGlory(gloryData)
+          }
+        }
+      } else {
+        console.log("[v0] Creating profile manually after retries")
+        const newProfile = await createUserProfile(authUser)
+
+        if (newProfile) {
+          setProfile(newProfile)
+
+          if (!newProfile.isGuest) {
             const { data: masteryData } = await supabase
               .from("mastery")
               .select("*")
-              .eq("user_id", profileData.id)
+              .eq("user_id", newProfile.id)
               .maybeSingle()
-
-            if (masteryData) {
-              console.log("[v0] Mastery loaded")
-              setMastery(masteryData)
-            }
+            setMastery(masteryData)
 
             const { data: gloryData } = await supabase
               .from("glory")
               .select("*")
-              .eq("user_id", profileData.id)
+              .eq("user_id", newProfile.id)
               .maybeSingle()
-
-            if (gloryData) {
-              console.log("[v0] Glory loaded")
-              setGlory(gloryData)
-            }
+            setGlory(gloryData)
           }
-        } else {
-          console.log("[v0] Creating new profile")
-          const newProfile = await createUserProfile(authUser)
-
-          if (newProfile) {
-            setProfile(newProfile)
-
-            if (!newProfile.isGuest) {
-              const { data: masteryData } = await supabase
-                .from("mastery")
-                .select("*")
-                .eq("user_id", newProfile.id)
-                .maybeSingle()
-              setMastery(masteryData)
-
-              const { data: gloryData } = await supabase
-                .from("glory")
-                .select("*")
-                .eq("user_id", newProfile.id)
-                .maybeSingle()
-              setGlory(gloryData)
-            }
-          }
-        }
-      } else {
-        const guestMode = localStorage.getItem("brain_battle_guest_mode")
-        if (guestMode === "true") {
-          const guestProfile = localStorage.getItem("brain_battle_guest_profile")
-          if (guestProfile) {
-            try {
-              const parsedProfile = JSON.parse(guestProfile)
-              setProfile(parsedProfile)
-
-              const tempUser = {
-                id: parsedProfile.auth_id,
-                email: parsedProfile.email,
-                user_metadata: { is_guest: true },
-                app_metadata: {},
-                aud: "authenticated",
-                created_at: parsedProfile.created_at,
-              } as User
-              setUser(tempUser)
-            } catch {
-              // Silent error handling
-            }
-          }
-        } else {
-          setUser(null)
-          setProfile(null)
-          setMastery(null)
-          setGlory(null)
         }
       }
     } catch (error) {
