@@ -244,9 +244,8 @@ export const createCheckoutSession = async (itemType: string, itemId: string, it
 
     const session = await response.json()
     return session.url
-  } catch (error) {
-    console.error("Checkout error:", error)
-    throw error
+  } catch {
+    throw new Error("Checkout session creation failed")
   }
 }
 
@@ -257,7 +256,7 @@ export const getOwnedItems = async (userId: string) => {
 
   if (userId?.startsWith("guest_")) {
     const guestPurchases = JSON.parse(localStorage.getItem("brain_battle_guest_purchases") || "[]")
-    return guestPurchases.map((p: any) => ({
+    return guestPurchases.map((p: { item_type: string; item_id: string; item_name: string }) => ({
       item_type: p.item_type,
       item_id: p.item_id,
       item_name: p.item_name,
@@ -271,7 +270,6 @@ export const getOwnedItems = async (userId: string) => {
     .eq("status", "completed")
 
   if (error) {
-    console.error("Error fetching purchases:", error)
     return []
   }
 
@@ -303,7 +301,9 @@ export const isItemOwned = async (userId: string, itemType: string, itemId: stri
 
   if (userId?.startsWith("guest_")) {
     const guestPurchases = JSON.parse(localStorage.getItem("brain_battle_guest_purchases") || "[]")
-    const isOwned = guestPurchases.some((p: any) => p.item_type === itemType && p.item_id === itemId)
+    const isOwned = guestPurchases.some(
+      (p: { item_type: string; item_id: string }) => p.item_type === itemType && p.item_id === itemId,
+    )
     if (isOwned) return true
   }
 
@@ -320,8 +320,7 @@ export const isItemOwned = async (userId: string, itemType: string, itemId: stri
       .maybeSingle()
 
     return !!data
-  } catch (error) {
-    console.error("Unexpected error checking ownership:", error)
+  } catch {
     return false
   }
 }
@@ -378,7 +377,7 @@ export const recordGameProgress = async (gameId: string, score: number, win: boo
   }
 }
 
-export const autoSaveProgress = async (gameState: any) => {
+export const autoSaveProgress = async (gameState: Record<string, unknown>) => {
   const supabase = createClient()
   const {
     data: { user },
@@ -394,7 +393,7 @@ export const autoSaveProgress = async (gameState: any) => {
       const keys = Object.keys(guestSaves)
         .sort((a, b) => Number(b) - Number(a))
         .slice(0, 10)
-      const recentSaves = {}
+      const recentSaves: Record<string, unknown> = {}
       keys.forEach((key) => {
         recentSaves[key] = guestSaves[key]
       })
@@ -427,8 +426,8 @@ export const autoSaveProgress = async (gameState: any) => {
         updated_at: new Date().toISOString(),
       })
     }
-  } catch (error) {
-    console.error("Auto-save error:", error)
+  } catch {
+    // Silent error handling
   }
 }
 
@@ -437,17 +436,14 @@ export const initDemoPurchases = async (userId: string) => {
     return
   }
 
-  // Check if demo purchases already initialized
   const existingPurchases = localStorage.getItem("brain_battle_demo_purchases")
   if (existingPurchases) {
     const purchases = JSON.parse(existingPurchases)
-    // If there are already some purchases for this user, don't reinitialize
-    if (purchases.some((p: any) => p.user_id === userId)) {
+    if (purchases.some((p: { user_id: string }) => p.user_id === userId)) {
       return
     }
   }
 
-  // Initialize some demo purchases for testing in development
   const demoPurchases = [
     {
       id: "demo_avatar_1",
@@ -478,6 +474,4 @@ export const initDemoPurchases = async (userId: string) => {
   const allPurchases = existingPurchases ? JSON.parse(existingPurchases) : []
   allPurchases.push(...demoPurchases)
   localStorage.setItem("brain_battle_demo_purchases", JSON.stringify(allPurchases))
-
-  console.log("[Dev] Demo purchases initialized for user:", userId)
 }

@@ -59,13 +59,11 @@ export const useUser = () => {
           const { data: existingProfile } = await supabase.from("users").select("*").eq("auth_id", authUser.id).single()
           return existingProfile
         }
-        console.error("Profile creation error:", error)
         return null
       }
 
       return data
-    } catch (error) {
-      console.error("Error creating profile:", error)
+    } catch {
       return null
     }
   }, [])
@@ -94,8 +92,7 @@ export const useUser = () => {
           if (!error && session?.user) {
             setUser(session.user)
           }
-        } catch (e) {
-          console.error("Session restore error:", e)
+        } catch {
           localStorage.removeItem("brain_battle_session")
         }
       }
@@ -177,8 +174,8 @@ export const useUser = () => {
               created_at: parsedProfile.created_at,
             } as User
             setUser(tempUser)
-          } catch (e) {
-            console.error("Error parsing guest profile:", e)
+          } catch {
+            // Silent error handling
           }
         }
       } else {
@@ -187,8 +184,8 @@ export const useUser = () => {
         setMastery(null)
         setGlory(null)
       }
-    } catch (error) {
-      console.error("Error fetching user data:", error)
+    } catch {
+      // Silent error handling
     } finally {
       setLoading(false)
     }
@@ -209,17 +206,13 @@ export const useUser = () => {
         timestamp: new Date().toISOString(),
       }
 
-      const { error } = await supabase.from("user_devices").insert({
+      await supabase.from("user_devices").insert({
         user_id: userId,
         device_info: deviceInfo,
         created_at: new Date().toISOString(),
       })
-
-      if (error && !error.message.includes("duplicate")) {
-        console.error("Error saving device:", error)
-      }
-    } catch (error) {
-      console.error("Error saving device:", error)
+    } catch {
+      // Silent error handling
     }
   }, [])
 
@@ -255,7 +248,6 @@ export const useUser = () => {
 
         return { isNew: false }
       } catch (error) {
-        console.error("Error updating profile:", error)
         throw error
       }
     },
@@ -311,7 +303,7 @@ export const useUser = () => {
         if (error) throw error
 
         if (existingProfile.isGuest) {
-          const { error: masteryError } = await supabase.from("mastery").insert({
+          await supabase.from("mastery").insert({
             user_id: authUser.id,
             level: 1,
             mini_level: 0,
@@ -320,17 +312,13 @@ export const useUser = () => {
             created_at: new Date().toISOString(),
           })
 
-          if (masteryError && !masteryError.message.includes("duplicate")) throw masteryError
-
-          const { error: gloryError } = await supabase.from("glory").insert({
+          await supabase.from("glory").insert({
             user_id: authUser.id,
             level: 1,
             wins: 0,
             total_glory_wins: 0,
             created_at: new Date().toISOString(),
           })
-
-          if (gloryError && !gloryError.message.includes("duplicate")) throw gloryError
         }
 
         result = { isNew: false }
@@ -349,7 +337,7 @@ export const useUser = () => {
 
         if (error) throw error
 
-        const { error: masteryError } = await supabase.from("mastery").insert({
+        await supabase.from("mastery").insert({
           user_id: authUser.id,
           level: 1,
           mini_level: 0,
@@ -358,17 +346,13 @@ export const useUser = () => {
           created_at: new Date().toISOString(),
         })
 
-        if (masteryError) throw masteryError
-
-        const { error: gloryError } = await supabase.from("glory").insert({
+        await supabase.from("glory").insert({
           user_id: authUser.id,
           level: 1,
           wins: 0,
           total_glory_wins: 0,
           created_at: new Date().toISOString(),
         })
-
-        if (gloryError) throw gloryError
 
         result = { isNew: true }
       }

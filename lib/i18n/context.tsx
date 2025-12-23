@@ -18,7 +18,26 @@ interface I18nContextType {
   t: (key: TranslationKeys) => string
 }
 
-const I18nContext = createContext<I18nContextType | undefined>(undefined)
+const defaultT = (key: TranslationKeys): string => {
+  const keys = key.split(".")
+  let value: unknown = translations["en"]
+  for (const k of keys) {
+    if (value && typeof value === "object" && k in value) {
+      value = (value as Record<string, unknown>)[k]
+    } else {
+      return key
+    }
+  }
+  return typeof value === "string" ? value : key
+}
+
+const defaultContextValue: I18nContextType = {
+  language: "en",
+  setLanguage: () => {},
+  t: defaultT,
+}
+
+const I18nContext = createContext<I18nContextType>(defaultContextValue)
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en")
@@ -65,18 +84,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     [language],
   )
 
-  if (!isClient) {
-    return <>{children}</>
-  }
-
   return <I18nContext.Provider value={{ language, setLanguage, t }}>{children}</I18nContext.Provider>
 }
 
 export function useI18n() {
   const context = useContext(I18nContext)
-  if (!context) {
-    throw new Error("useI18n must be used within I18nProvider")
-  }
   return context
 }
 

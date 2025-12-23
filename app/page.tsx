@@ -7,19 +7,7 @@ import { GameCard } from "@/components/ui/game-card"
 import { GameButton } from "@/components/ui/game-button"
 import { AvatarCircle } from "@/components/ui/avatar-circle"
 import { ProfileEditorModal } from "@/components/modals/profile-editor-modal"
-import {
-  Gamepad2,
-  Swords,
-  Trophy,
-  Settings,
-  Crown,
-  Brain,
-  Sparkles,
-  Pencil,
-  Loader2,
-  User
-} from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { Gamepad2, Swords, Settings, Crown, Brain, Pencil, Loader2, User } from "lucide-react"
 import { toast } from "sonner"
 
 export default function HomePage() {
@@ -30,26 +18,25 @@ export default function HomePage() {
 
   useEffect(() => {
     const checkGuestMode = async () => {
-      const guestMode = localStorage.getItem('brain_battle_guest_mode')
-      const session = localStorage.getItem('brain_battle_session')
-      
-      // Если нет сессии и пользователь не загружается, предлагаем гостевой режим
+      const guestMode = localStorage.getItem("brain_battle_guest_mode")
+      const session = localStorage.getItem("brain_battle_session")
+
       if (!session && !loading && !profile) {
-        console.log("Нет активной сессии, предлагаем гостевой режим")
+        // User can choose to start as guest later
       }
-      
+
       setInitializing(false)
     }
-    
+
     checkGuestMode()
   }, [loading, profile])
 
   const handleGuestPlay = async () => {
     try {
-      const guestProfile = quickGuestPlay()
+      quickGuestPlay()
       toast.success("Гостевой режим активирован!")
       router.push("/classic")
-    } catch (error) {
+    } catch {
       toast.error("Ошибка создания гостевого аккаунта")
     }
   }
@@ -133,9 +120,9 @@ export default function HomePage() {
           <div className="flex flex-col items-center gap-3 relative">
             <div className={`rounded-full p-1 ${avatarFrame} relative group`}>
               {profile?.avatar_url ? (
-                <AvatarCircle 
-                  src={profile.avatar_url} 
-                  size="lg" 
+                <AvatarCircle
+                  src={profile.avatar_url}
+                  size="lg"
                   className="transition-transform group-hover:scale-105"
                 />
               ) : (
@@ -144,7 +131,7 @@ export default function HomePage() {
                 </div>
               )}
               {profile && (
-                <button 
+                <button
                   onClick={() => setShowProfileEditor(true)}
                   className="absolute -bottom-1 -right-1 w-10 h-10 rounded-full bg-primary hover:bg-primary/90 transition-all flex items-center justify-center shadow-lg border-2 border-background z-10"
                   title="Редактировать профиль"
@@ -155,14 +142,8 @@ export default function HomePage() {
             </div>
 
             <div className="text-center">
-              <h2 className={`text-xl font-bold tracking-wide ${nicknameStyle}`}>
-                {profile?.username || "Гость"}
-              </h2>
-              {!profile && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Войдите или играйте как гость
-                </p>
-              )}
+              <h2 className={`text-xl font-bold tracking-wide ${nicknameStyle}`}>{profile?.username || "Гость"}</h2>
+              {!profile && <p className="text-sm text-muted-foreground mt-1">Войдите или играйте как гость</p>}
             </div>
           </div>
         </div>
@@ -170,12 +151,7 @@ export default function HomePage() {
 
       {/* Основные кнопки */}
       <div className="p-6 max-w-md mx-auto space-y-4">
-        <GameButton
-          variant="primary"
-          size="lg"
-          className="w-full"
-          onClick={handleClassicGames}
-        >
+        <GameButton variant="primary" size="lg" className="w-full" onClick={handleClassicGames}>
           <Gamepad2 className="w-5 h-5 mr-2" />
           Классические игры
         </GameButton>
@@ -199,12 +175,7 @@ export default function HomePage() {
 
         {!profile && (
           <div className="pt-4 border-t border-border">
-            <GameButton
-              variant="ghost"
-              size="lg"
-              className="w-full"
-              onClick={handleGuestPlay}
-            >
+            <GameButton variant="ghost" size="lg" className="w-full" onClick={handleGuestPlay}>
               <User className="w-5 h-5 mr-2" />
               Играть как гость
             </GameButton>
@@ -214,7 +185,7 @@ export default function HomePage() {
 
       {/* Карточки внизу */}
       <div className="p-6 grid grid-cols-2 gap-4 max-w-md mx-auto">
-        <GameCard 
+        <GameCard
           className="p-4 text-center hover:bg-accent/5 transition-colors cursor-pointer"
           onClick={() => router.push("/classic")}
         >
@@ -225,7 +196,7 @@ export default function HomePage() {
           <p className="text-xs text-muted-foreground">Соревнуйтесь с другими</p>
         </GameCard>
 
-        <GameCard 
+        <GameCard
           className="p-4 text-center hover:bg-accent/5 transition-colors cursor-pointer"
           onClick={() => router.push("/settings")}
         >

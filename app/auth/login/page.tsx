@@ -10,14 +10,7 @@ import { GameButton } from "@/components/ui/game-button"
 import { GameCard } from "@/components/ui/game-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { 
-  ArrowLeft, 
-  Mail, 
-  Lock, 
-  Loader2, 
-  User,
-  AlertCircle 
-} from "lucide-react"
+import { ArrowLeft, Mail, Lock, Loader2, User, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 export default function LoginPage() {
@@ -37,64 +30,54 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      // Шаг 1: Авторизация пользователя
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-      
+
       if (authError) throw authError
 
       if (!authData.user) {
         throw new Error("Ошибка авторизации: пользователь не получен")
       }
 
-      // Шаг 2: Проверка существования профиля
-      const { data: existingProfile, error: profileError } = await supabase
+      const { data: existingProfile } = await supabase
         .from("users")
         .select("*")
         .eq("auth_id", authData.user.id)
         .maybeSingle()
 
-      // Шаг 3: Создание профиля если его нет
       if (!existingProfile) {
-        console.log("Профиль не найден, создаем...", { userId: authData.user.id })
-        
-        const username = authData.user.user_metadata?.username || 
-                        authData.user.user_metadata?.full_name || 
-                        authData.user.email?.split('@')[0] || 
-                        `User_${Math.random().toString(36).substr(2, 8)}`
-        
-        const { error: createError } = await supabase
-          .from("users")
-          .insert({
-            auth_id: authData.user.id,
-            email: authData.user.email,
-            username: username.substring(0, 20),
-            avatar_url: authData.user.user_metadata?.avatar_url || 
-                       `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-            avatar_frame: 'none',
-            nickname_style: 'normal',
-            language: "ru",
-            sound_enabled: true,
-            music_enabled: true,
-            isGuest: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
+        const username =
+          authData.user.user_metadata?.username ||
+          authData.user.user_metadata?.full_name ||
+          authData.user.email?.split("@")[0] ||
+          `User_${Math.random().toString(36).substr(2, 8)}`
+
+        const { error: createError } = await supabase.from("users").insert({
+          auth_id: authData.user.id,
+          email: authData.user.email,
+          username: username.substring(0, 20),
+          avatar_url:
+            authData.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
+          avatar_frame: "none",
+          nickname_style: "normal",
+          language: "ru",
+          sound_enabled: true,
+          music_enabled: true,
+          isGuest: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
 
         if (createError) {
-          console.error("Ошибка создания профиля:", createError)
-          
-          // Если профиль уже существует (race condition), игнорируем ошибку
-          if (!(createError.code === '23505' || createError.message.includes('duplicate'))) {
+          if (!(createError.code === "23505" || createError.message.includes("duplicate"))) {
             throw createError
           }
         }
 
-        // Шаг 4: Создаем записи mastery и glory для нового пользователя
         try {
-          const { error: masteryError } = await supabase.from("mastery").insert({
+          await supabase.from("mastery").insert({
             user_id: authData.user.id,
             level: 1,
             mini_level: 0,
@@ -103,44 +86,35 @@ export default function LoginPage() {
             created_at: new Date().toISOString(),
           })
 
-          if (masteryError && !masteryError.message.includes('duplicate')) {
-            console.warn("Ошибка создания mastery:", masteryError)
-          }
-
-          const { error: gloryError } = await supabase.from("glory").insert({
+          await supabase.from("glory").insert({
             user_id: authData.user.id,
             level: 1,
             wins: 0,
             total_glory_wins: 0,
             created_at: new Date().toISOString(),
           })
-
-          if (gloryError && !gloryError.message.includes('duplicate')) {
-            console.warn("Ошибка создания glory:", gloryError)
-          }
-        } catch (statsError) {
-          console.warn("Не удалось создать статистику, пользователь создан без нее:", statsError)
+        } catch {
+          // Silent error handling
         }
       } else {
-        console.log("Профиль найден:", existingProfile.id)
-        
-        // Обновляем данные сессии в localStorage
         const session = await supabase.auth.getSession()
         if (session.data.session) {
-          localStorage.setItem('brain_battle_session', JSON.stringify({
-            access_token: session.data.session.access_token,
-            refresh_token: session.data.session.refresh_token,
-            expires_at: session.data.session.expires_at,
-          }))
-          localStorage.setItem('brain_battle_auto_login', 'true')
-          
+          localStorage.setItem(
+            "brain_battle_session",
+            JSON.stringify({
+              access_token: session.data.session.access_token,
+              refresh_token: session.data.session.refresh_token,
+              expires_at: session.data.session.expires_at,
+            }),
+          )
+          localStorage.setItem("brain_battle_auto_login", "true")
+
           if (existingProfile.username) {
-            localStorage.setItem('brain_battle_username', existingProfile.username)
+            localStorage.setItem("brain_battle_username", existingProfile.username)
           }
         }
       }
 
-      // Шаг 5: Сохраняем информацию об устройстве
       try {
         const deviceInfo = {
           user_agent: navigator.userAgent,
@@ -149,23 +123,19 @@ export default function LoginPage() {
           screen_width: window.screen.width,
           screen_height: window.screen.height,
           language: navigator.language,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         }
 
-        await supabase
-          .from("user_devices")
-          .insert({
-            user_id: authData.user.id,
-            device_info: deviceInfo,
-            created_at: new Date().toISOString()
-          })
-      } catch (deviceError) {
-        console.warn("Ошибка сохранения устройства:", deviceError)
+        await supabase.from("user_devices").insert({
+          user_id: authData.user.id,
+          device_info: deviceInfo,
+          created_at: new Date().toISOString(),
+        })
+      } catch {
+        // Silent error handling
       }
 
-      // Шаг 6: Переход на главную страницу
       router.push("/")
-
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -179,8 +149,6 @@ export default function LoginPage() {
 
     try {
       await signInWithGoogle()
-      // После успешного входа через Google, проверка профиля произойдет
-      // в useUser хуке через onAuthStateChange
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Failed to sign in with Google")
       setIsGoogleLoading(false)
@@ -310,11 +278,7 @@ export default function LoginPage() {
               onClick={handleGuestPlay}
               disabled={isGuestLoading || isLoading || isGoogleLoading}
             >
-              {isGuestLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              ) : (
-                <User className="w-5 h-5 mr-2" />
-              )}
+              {isGuestLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <User className="w-5 h-5 mr-2" />}
               {t("auth.guest")}
             </GameButton>
 
