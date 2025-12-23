@@ -59,7 +59,7 @@ export const useUser = () => {
       const { data, error } = await supabase
         .from("users")
         .upsert(profileData, { onConflict: "auth_id" })
-        .select()
+        .select("id, auth_id")
         .single()
 
       if (error) {
@@ -67,7 +67,36 @@ export const useUser = () => {
         return null
       }
 
-      return data
+      console.log("[v0] Profile created/updated with id:", data.id)
+
+      const { data: existingMastery } = await supabase.from("mastery").select("id").eq("user_id", data.id).maybeSingle()
+
+      if (!existingMastery && !profileData.isGuest) {
+        await supabase.from("mastery").insert({
+          user_id: data.id,
+          level: 1,
+          mini_level: 0,
+          fragments: 0,
+          total_wins: 0,
+          created_at: new Date().toISOString(),
+        })
+      }
+
+      const { data: existingGlory } = await supabase.from("glory").select("id").eq("user_id", data.id).maybeSingle()
+
+      if (!existingGlory && !profileData.isGuest) {
+        await supabase.from("glory").insert({
+          user_id: data.id,
+          level: 1,
+          wins: 0,
+          total_glory_wins: 0,
+          created_at: new Date().toISOString(),
+        })
+      }
+
+      const { data: completeProfile } = await supabase.from("users").select("*").eq("id", data.id).single()
+
+      return completeProfile
     } catch (error) {
       console.error("[v0] Profile creation exception:", error)
       return null
@@ -151,27 +180,55 @@ export const useUser = () => {
         }
 
         if (profileData) {
-          console.log("[v0] Profile loaded")
+          console.log("[v0] Profile loaded:", profileData.id)
           setProfile(profileData)
+
+          if (!profileData.isGuest) {
+            const { data: masteryData } = await supabase
+              .from("mastery")
+              .select("*")
+              .eq("user_id", profileData.id)
+              .maybeSingle()
+
+            if (masteryData) {
+              console.log("[v0] Mastery loaded")
+              setMastery(masteryData)
+            }
+
+            const { data: gloryData } = await supabase
+              .from("glory")
+              .select("*")
+              .eq("user_id", profileData.id)
+              .maybeSingle()
+
+            if (gloryData) {
+              console.log("[v0] Glory loaded")
+              setGlory(gloryData)
+            }
+          }
         } else {
           console.log("[v0] Creating new profile")
           const newProfile = await createUserProfile(authUser)
 
           if (newProfile) {
             setProfile(newProfile)
+
+            if (!newProfile.isGuest) {
+              const { data: masteryData } = await supabase
+                .from("mastery")
+                .select("*")
+                .eq("user_id", newProfile.id)
+                .maybeSingle()
+              setMastery(masteryData)
+
+              const { data: gloryData } = await supabase
+                .from("glory")
+                .select("*")
+                .eq("user_id", newProfile.id)
+                .maybeSingle()
+              setGlory(gloryData)
+            }
           }
-        }
-
-        if (profileData && !profileData.isGuest) {
-          const { data: masteryData } = await supabase
-            .from("mastery")
-            .select("*")
-            .eq("user_id", authUser.id)
-            .maybeSingle()
-          setMastery(masteryData)
-
-          const { data: gloryData } = await supabase.from("glory").select("*").eq("user_id", authUser.id).maybeSingle()
-          setGlory(gloryData)
         }
       } else {
         const guestMode = localStorage.getItem("brain_battle_guest_mode")
@@ -323,7 +380,7 @@ export const useUser = () => {
 
         if (existingProfile.isGuest) {
           await supabase.from("mastery").insert({
-            user_id: authUser.id,
+            user_id: existingProfile.id,
             level: 1,
             mini_level: 0,
             fragments: 0,
@@ -332,7 +389,7 @@ export const useUser = () => {
           })
 
           await supabase.from("glory").insert({
-            user_id: authUser.id,
+            user_id: existingProfile.id,
             level: 1,
             wins: 0,
             total_glory_wins: 0,
@@ -342,22 +399,26 @@ export const useUser = () => {
 
         result = { isNew: false }
       } else {
-        const { error } = await supabase.from("users").insert({
-          auth_id: authUser.id,
-          email: authUser.email,
-          username: gameUsername,
-          language: "en",
-          sound_enabled: true,
-          music_enabled: true,
-          isGuest: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
+        const { data: newUser, error } = await supabase
+          .from("users")
+          .insert({
+            auth_id: authUser.id,
+            email: authUser.email,
+            username: gameUsername,
+            language: "en",
+            sound_enabled: true,
+            music_enabled: true,
+            isGuest: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .select("id")
+          .single()
 
         if (error) throw error
 
         await supabase.from("mastery").insert({
-          user_id: authUser.id,
+          user_id: newUser.id,
           level: 1,
           mini_level: 0,
           fragments: 0,
@@ -366,7 +427,7 @@ export const useUser = () => {
         })
 
         await supabase.from("glory").insert({
-          user_id: authUser.id,
+          user_id: newUser.id,
           level: 1,
           wins: 0,
           total_glory_wins: 0,

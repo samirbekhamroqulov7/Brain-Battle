@@ -25,60 +25,94 @@ export async function GET(request: Request) {
     if (sessionError) throw sessionError
     if (!sessionData.session) throw new Error("Session not created")
 
-    const user = sessionData.user
+    const authUser = sessionData.user
 
-    if (!user) {
+    if (!authUser) {
       return NextResponse.redirect(
         new URL(`/auth/error?message=${encodeURIComponent("User session initialization failed")}`, requestUrl.origin),
       )
     }
 
-    const username =
-      user.user_metadata?.full_name ||
-      user.user_metadata?.name ||
-      user.user_metadata?.user_name ||
-      user.email?.split("@")[0] ||
-      `User_${Math.random().toString(36).substr(2, 8)}`
+    console.log("[v0] OAuth callback - auth user:", authUser.id)
 
-    const avatarUrl =
-      user.user_metadata?.avatar_url ||
-      user.user_metadata?.picture ||
-      `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
+    const { data: existingUser } = await supabase
+      .from("users")
+      .select("id, auth_id")
+      .eq("auth_id", authUser.id)
+      .maybeSingle()
 
-    const { data: existingUser } = await supabase.from("users").select("id").eq("auth_id", user.id).maybeSingle()
+    let userId: string
 
     if (existingUser) {
+      console.log("[v0] User exists, updating profile")
+      userId = existingUser.id
+
+      const username =
+        authUser.user_metadata?.full_name ||
+        authUser.user_metadata?.name ||
+        authUser.user_metadata?.user_name ||
+        authUser.email?.split("@")[0] ||
+        `User_${Math.random().toString(36).substr(2, 8)}`
+
+      const avatarUrl =
+        authUser.user_metadata?.avatar_url ||
+        authUser.user_metadata?.picture ||
+        `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
+
       await supabase
         .from("users")
         .update({
-          email: user.email,
+          email: authUser.email,
+          username: username.substring(0, 20),
           avatar_url: avatarUrl,
           updated_at: new Date().toISOString(),
         })
-        .eq("auth_id", user.id)
+        .eq("id", userId)
     } else {
-      const { error: insertError } = await supabase.from("users").insert({
-        auth_id: user.id,
-        email: user.email,
-        username: username.substring(0, 20),
-        avatar_url: avatarUrl,
-        avatar_frame: "none",
-        nickname_style: "normal",
-        language: "ru",
-        sound_enabled: true,
-        music_enabled: true,
-        isGuest: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
+      console.log("[v0] Creating new user profile")
+
+      const username =
+        authUser.user_metadata?.full_name ||
+        authUser.user_metadata?.name ||
+        authUser.user_metadata?.user_name ||
+        authUser.email?.split("@")[0] ||
+        `User_${Math.random().toString(36).substr(2, 8)}`
+
+      const avatarUrl =
+        authUser.user_metadata?.avatar_url ||
+        authUser.user_metadata?.picture ||
+        `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`
+
+      const { data: newUser, error: insertError } = await supabase
+        .from("users")
+        .insert({
+          auth_id: authUser.id,
+          email: authUser.email,
+          username: username.substring(0, 20),
+          avatar_url: avatarUrl,
+          avatar_frame: "none",
+          nickname_style: "normal",
+          language: "ru",
+          sound_enabled: true,
+          music_enabled: true,
+          isGuest: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .select("id")
+        .single()
 
       if (insertError) {
-        console.error("Profile creation error:", insertError)
+        console.error("[v0] Profile creation error:", insertError)
+        throw new Error("Failed to create user profile")
       }
 
+      userId = newUser.id
+      console.log("[v0] New user created with id:", userId)
+
       try {
-        await supabase.from("mastery").insert({
-          user_id: user.id,
+        const { error: masteryError } = await supabase.from("mastery").insert({
+          user_id: userId,
           level: 1,
           mini_level: 0,
           fragments: 0,
@@ -86,15 +120,25 @@ export async function GET(request: Request) {
           created_at: new Date().toISOString(),
         })
 
-        await supabase.from("glory").insert({
-          user_id: user.id,
+        if (masteryError) {
+          console.error("[v0] Mastery creation error:", masteryError)
+        }
+
+        const { error: gloryError } = await supabase.from("glory").insert({
+          user_id: userId,
           level: 1,
           wins: 0,
           total_glory_wins: 0,
           created_at: new Date().toISOString(),
         })
+
+        if (gloryError) {
+          console.error("[v0] Glory creation error:", gloryError)
+        }
+
+        console.log("[v0] Mastery and glory records created")
       } catch (error) {
-        console.error("Mastery/Glory creation error:", error)
+        console.error("[v0] Error creating mastery/glory:", error)
       }
     }
 
@@ -106,7 +150,7 @@ export async function GET(request: Request) {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     })
 
@@ -116,7 +160,7 @@ export async function GET(request: Request) {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
       path: "/",
     })
 
@@ -126,13 +170,14 @@ export async function GET(request: Request) {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 5,
+      maxAge: 10,
       path: "/",
     })
 
+    console.log("[v0] Redirecting to home with session cookies")
     return response
   } catch (error: any) {
-    console.error("Auth callback error:", error)
+    console.error("[v0] Auth callback error:", error)
     return NextResponse.redirect(
       new URL(
         `/auth/error?message=${encodeURIComponent(error?.message || "Unexpected authentication error")}`,
