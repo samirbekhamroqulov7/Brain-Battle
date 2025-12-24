@@ -82,15 +82,18 @@ export const useUser = () => {
 
       if (data && data.user) {
         if (!data.profile && data.user.id) {
-          const profile = await ensureUserProfile(data.user.id, data.user.email)
+          // try to create or fetch profile (this requires session to be active)
+          const createdProfile = await ensureUserProfile(data.user.id, data.user.email)
           
-          if (profile) {
+          if (createdProfile) {
             setUser(data.user)
-            setProfile(profile)
+            setProfile(createdProfile)
             setMastery(data.mastery)
             setGlory(data.glory)
           } else {
-            setUser(null)
+            // DON'T clear user here — keep user so UI can show "profile not found" and retry logic works
+            console.warn("[v0] Profile creation failed; keeping user in state and leaving profile null")
+            setUser(data.user)
             setProfile(null)
             setMastery(null)
             setGlory(null)

@@ -12,7 +12,8 @@ export async function fetchUserFromAPI() {
           email: data.user.email,
           user_metadata: {},
         },
-        profile: data.user,
+        // FIX: return profile from data.profile, not data.user
+        profile: data.profile,
         mastery: data.mastery,
         glory: data.glory,
       }

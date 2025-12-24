@@ -79,6 +79,7 @@ export async function GET(request: Request) {
         }
       }
 
+      // Double-check profile exists before redirect
       const { data: profileCheck } = await supabase
         .from("users")
         .select("*")
@@ -92,8 +93,38 @@ export async function GET(request: Request) {
         )
       }
 
-      console.log("[v0] OAuth callback completed successfully")
-      return NextResponse.redirect(`${origin}/`)
+      // IMPORTANT: set small client-readable cookies so SessionRestorer can pick them up.
+      // We set auth_refresh flag and non-httpOnly sb tokens so client JS can detect them and restore session.
+      const redirectUrl = `${origin}/`
+
+      const res = NextResponse.redirect(redirectUrl)
+
+      // Set a short-lived flag to indicate client should restore session.
+      res.cookies.set("auth_refresh", "1", { path: "/", maxAge: 60 })
+
+      // If supabase returned a session, expose access/refresh tokens to client cookies (non-httpOnly)
+      // so SessionRestorer (client) will be able to call supabase.auth.setSession(...)
+      if (data.session) {
+        // maxAge: ensure it's not negative; default to 60s if expires_at is missing
+        const nowSec = Math.floor(Date.now() / 1000)
+        const expiresAt = data.session.expires_at ? Math.max(60, data.session.expires_at - nowSec) : 60
+
+        res.cookies.set("sb-access-token", data.session.access_token || "", {
+          path: "/",
+          maxAge: expiresAt,
+          httpOnly: false,
+          sameSite: "lax",
+        })
+        res.cookies.set("sb-refresh-token", data.session.refresh_token || "", {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 30, // keep refresh for longer; SessionRestorer will clear it
+          httpOnly: false,
+          sameSite: "lax",
+        })
+      }
+
+      console.log("[v0] OAuth callback completed successfully (cookies set)")
+      return res
     }
   }
 
