@@ -37,159 +37,78 @@ export const getGuestSession = () => {
   return null
 }
 
-export const signInWithGoogle = async () => {
-  const supabase = createClient()
-
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000")
-
-  const redirectUrl = `${siteUrl}/auth/callback`
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: redirectUrl,
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
-      },
-    },
-  })
-
-  if (error) throw error
-
-  return data
-}
-
 export const signInWithEmail = async (email: string, password: string) => {
-  const supabase = createClient()
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
+  const response = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
   })
 
-  if (error) throw error
-
-  if (data.session && typeof window !== "undefined") {
-    localStorage.setItem(
-      "brain_battle_session",
-      JSON.stringify({
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-        expires_at: data.session.expires_at,
-      }),
-    )
-    localStorage.setItem("brain_battle_auto_login", "true")
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.error || "Login failed")
   }
 
-  return data
+  return await response.json()
 }
 
 export const signUpWithEmail = async (email: string, password: string, username: string) => {
-  const supabase = createClient()
-
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { username },
-    },
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, username }),
   })
 
-  if (signUpError) throw signUpError
-
-  const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (signInError) throw signInError
-
-  const { error: profileError } = await supabase.from("users").upsert({
-    auth_id: authData.user?.id || signInData.user?.id,
-    email: email,
-    username: username.substring(0, 20),
-    avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-    avatar_frame: "none",
-    nickname_style: "normal",
-    language: "ru",
-    sound_enabled: true,
-    music_enabled: true,
-    isGuest: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  })
-
-  if (profileError) {
-    console.error("Profile creation error:", profileError)
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.error || "Registration failed")
   }
 
-  if (signInData.session && typeof window !== "undefined") {
-    localStorage.setItem(
-      "brain_battle_session",
-      JSON.stringify({
-        access_token: signInData.session.access_token,
-        refresh_token: signInData.session.refresh_token,
-        expires_at: signInData.session.expires_at,
-      }),
-    )
-    localStorage.setItem("brain_battle_auto_login", "true")
-    localStorage.setItem("brain_battle_username", username)
-  }
-
-  return { user: signInData.user, session: signInData.session }
+  return await response.json()
 }
 
 export const signInAsGuest = async () => {
-  const supabase = createClient()
-  const guestId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  const guestName = `Guest_${guestId.slice(-4)}`
-
-  enableGuestMode()
-
-  localStorage.setItem(
-    "brain_battle_guest_session",
-    JSON.stringify({
-      id: guestId,
-      name: guestName,
-      created_at: new Date().toISOString(),
-    }),
-  )
-
-  const { data, error } = await supabase.auth.signInAnonymously({
-    options: {
-      data: {
-        is_guest: true,
-        guest_id: guestId,
-        guest_name: guestName,
-        created_at: new Date().toISOString(),
-      },
-    },
+  const response = await fetch("/api/auth/guest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
   })
 
-  if (error) throw error
+  if (!response.ok) {
+    const data = await response.json()
+    throw new Error(data.error || "Failed to create guest account")
+  }
 
-  return data
+  return await response.json()
 }
 
 export const signOut = async () => {
-  const supabase = createClient()
-  disableGuestMode()
-  localStorage.removeItem("brain_battle_guest_session")
-  const { error } = await supabase.auth.signOut()
-  if (error) throw error
+  const response = await fetch("/api/auth/logout", {
+    method: "POST",
+  })
+
+  if (!response.ok) {
+    throw new Error("Logout failed")
+  }
+
+  return await response.json()
+}
+
+export const signInWithGoogle = async () => {
+  // In production, implement proper OAuth flow
+  throw new Error("Google sign-in not yet configured. Please use email/password or guest mode.")
 }
 
 export const createCheckoutSession = async (itemType: string, itemId: string, itemName: string, price: number) => {
-  const supabase = createClient()
+  const response = await fetch("/api/auth/me")
+  const data = await response.json()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error("Пользователь не авторизован")
+  if (!data.user) {
+    throw new Error("User not authenticated")
+  }
 
+  const user = data.user
+
+  // Demo purchases for development
   if (typeof window !== "undefined" && process.env.NODE_ENV === "development" && price <= 10) {
     const demoPurchase = {
       id: "demo_" + Date.now(),
@@ -219,54 +138,35 @@ export const createCheckoutSession = async (itemType: string, itemId: string, it
     return `${window.location.origin}/profile?purchase=success&item=${itemId}`
   }
 
-  const { data: purchase, error } = await supabase
-    .from("user_purchases")
-    .insert({
-      user_id: user.id,
+  // Guest purchases
+  if (user.auth_id?.startsWith("guest_") && typeof window !== "undefined") {
+    const guestPurchases = JSON.parse(localStorage.getItem("brain_battle_guest_purchases") || "[]")
+    guestPurchases.push({
       item_type: itemType,
       item_id: itemId,
       item_name: itemName,
       price: price,
-      currency: "USD",
-      status: "pending",
-      payment_method: "stripe",
-      created_at: new Date().toISOString(),
+      purchased_at: new Date().toISOString(),
     })
-    .select()
-    .single()
+    localStorage.setItem("brain_battle_guest_purchases", JSON.stringify(guestPurchases))
 
-  if (error) {
-    if (user.id?.startsWith("guest_") && typeof window !== "undefined") {
-      const guestPurchases = JSON.parse(localStorage.getItem("brain_battle_guest_purchases") || "[]")
-      guestPurchases.push({
-        item_type: itemType,
-        item_id: itemId,
-        item_name: itemName,
-        price: price,
-        purchased_at: new Date().toISOString(),
-      })
-      localStorage.setItem("brain_battle_guest_purchases", JSON.stringify(guestPurchases))
+    window.dispatchEvent(
+      new CustomEvent("guestPurchaseCompleted", {
+        detail: { itemType, itemId, itemName },
+      }),
+    )
 
-      window.dispatchEvent(
-        new CustomEvent("guestPurchaseCompleted", {
-          detail: { itemType, itemId, itemName },
-        }),
-      )
-
-      return `${window.location.origin}/profile?purchase=success&item=${itemId}`
-    }
-
-    throw error
+    return `${window.location.origin}/profile?purchase=success&item=${itemId}`
   }
 
+  // Real checkout for authenticated users
   try {
-    const response = await fetch("/api/create-checkout-session", {
+    const checkoutResponse = await fetch("/api/create-checkout-session", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        purchaseId: purchase.id,
         itemName,
         price,
         itemType,
@@ -274,9 +174,9 @@ export const createCheckoutSession = async (itemType: string, itemId: string, it
       }),
     })
 
-    if (!response.ok) throw new Error("Failed to create checkout session")
+    if (!checkoutResponse.ok) throw new Error("Failed to create checkout session")
 
-    const session = await response.json()
+    const session = await checkoutResponse.json()
     return session.url
   } catch {
     throw new Error("Checkout session creation failed")
@@ -460,8 +360,7 @@ export const autoSaveProgress = async (gameState: Record<string, unknown>) => {
         updated_at: new Date().toISOString(),
       })
     }
-  } catch {
-  }
+  } catch {}
 }
 
 export const initDemoPurchases = async (userId: string) => {

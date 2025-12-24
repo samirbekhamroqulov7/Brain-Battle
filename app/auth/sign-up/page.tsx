@@ -8,31 +8,31 @@ import Link from "next/link"
 import { GameButton } from "@/components/ui/game-button"
 import { GameCard } from "@/components/ui/game-card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useI18n } from "@/lib/i18n/context"
-import { createClient } from "@/lib/supabase/client"
-import { Loader2, Mail, Lock, User, ArrowLeft, CheckCircle } from "lucide-react"
-import { toast } from "sonner"
+import { Loader2, Mail, Lock, User, ArrowLeft, AlertCircle } from "lucide-react"
 
 export default function SignUpPage() {
   const { t } = useI18n()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     username: "",
   })
-  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
@@ -44,132 +44,117 @@ export default function SignUpPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed')
+        throw new Error(data.error || "Registration failed")
       }
 
-      if (data.success && data.session) {
-        localStorage.setItem(
-          "brain_battle_session",
-          JSON.stringify({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            expires_at: data.session.expires_at,
-          })
-        )
-        localStorage.setItem("brain_battle_auto_login", "true")
-        localStorage.setItem("brain_battle_username", formData.username)
-
-        toast.success("Регистрация успешна! Добро пожаловать!")
-        
-        setTimeout(() => {
-          router.push("/")
-          router.refresh()
-        }, 1000)
-      }
-    } catch (error: any) {
-      console.error("Registration error:", error)
-      toast.error(error.message || "Ошибка регистрации")
+      router.push("/")
+      router.refresh()
+    } catch (error: unknown) {
+      console.error("[v0] Registration error:", error)
+      setError(error instanceof Error ? error.message : "Registration failed")
     } finally {
       setLoading(false)
     }
   }
 
-  if (success) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
-        <GameCard className="max-w-md w-full p-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-green-500" />
-          </div>
-          <h1 className="text-2xl font-bold mb-4">Регистрация успешна!</h1>
-          <p className="text-muted-foreground mb-6">Перенаправляем на главную страницу...</p>
-          <div className="flex flex-col items-center">
-            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-            <p className="text-sm text-muted-foreground">Загрузка...</p>
-          </div>
-        </GameCard>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border p-4">
-        <div className="flex items-center gap-4">
-          <GameButton variant="ghost" size="sm" onClick={() => router.push("/")}>
-            <ArrowLeft className="w-5 h-5" />
-          </GameButton>
-          <h1 className="text-2xl font-bold text-primary uppercase tracking-wider">{t("auth.create_account")}</h1>
-        </div>
+    <div className="min-h-screen flex flex-col bg-background safe-area-top safe-area-bottom">
+      <div className="p-4">
+        <GameButton variant="ghost" size="sm" onClick={() => router.push("/")}>
+          <ArrowLeft className="w-5 h-5" />
+        </GameButton>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-4">
-        <GameCard className="max-w-md w-full p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <User className="w-4 h-4" />
-                {t("auth.username")}
-              </label>
-              <Input
-                type="text"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                placeholder={t("auth.username_placeholder")}
-                required
-                minLength={3}
-                maxLength={20}
-              />
-            </div>
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          <GameCard variant="elevated" className="p-6">
+            <h1 className="text-2xl font-bold text-primary text-center mb-6">{t("auth.create_account")}</h1>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                {t("auth.email")}
-              </label>
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="email@example.com"
-                required
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-foreground">
+                  {t("auth.username")}
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="username"
+                    type="text"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    placeholder={t("auth.username_placeholder")}
+                    className="pl-10 bg-secondary border-border"
+                    required
+                    minLength={3}
+                    maxLength={20}
+                  />
+                </div>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Lock className="w-4 h-4" />
-                {t("auth.password")}
-              </label>
-              <Input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder={t("auth.password_placeholder")}
-                required
-                minLength={6}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-foreground">
+                  {t("auth.email")}
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="email@example.com"
+                    className="pl-10 bg-secondary border-border"
+                    required
+                  />
+                </div>
+              </div>
 
-            <GameButton type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t("auth.creating_account")}
-                </>
-              ) : (
-                t("auth.create_account")
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-foreground">
+                  {t("auth.password")}
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder={t("auth.password_placeholder")}
+                    className="pl-10 bg-secondary border-border"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded">
+                  <AlertCircle className="w-4 h-4 text-destructive" />
+                  <p className="text-sm text-destructive">{error}</p>
+                </div>
               )}
-            </GameButton>
 
-            <div className="text-center text-sm text-muted-foreground">
+              <GameButton type="submit" variant="primary" size="md" className="w-full mt-2" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t("auth.creating_account")}
+                  </>
+                ) : (
+                  t("auth.create_account")
+                )}
+              </GameButton>
+            </form>
+
+            <p className="text-center text-sm text-muted-foreground mt-6">
               {t("auth.already_have_account")}{" "}
               <Link href="/auth/login" className="text-primary hover:underline font-medium">
                 {t("auth.login_here")}
               </Link>
-            </div>
-          </form>
-        </GameCard>
+            </p>
+          </GameCard>
+        </div>
       </div>
     </div>
   )

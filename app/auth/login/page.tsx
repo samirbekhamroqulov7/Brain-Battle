@@ -3,7 +3,6 @@
 import type React from "react"
 
 import { useState } from "react"
-import { createClient, signInWithGoogle, signInAsGuest } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useI18n } from "@/lib/i18n/context"
 import { GameButton } from "@/components/ui/game-button"
@@ -25,115 +24,25 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (authError) throw authError
+      const data = await response.json()
 
-      if (!authData.user) {
-        throw new Error("Ошибка авторизации: пользователь не получен")
+      if (!response.ok) {
+        throw new Error(data.error || "Login failed")
       }
 
-      const { data: existingProfile } = await supabase
-        .from("users")
-        .select("*")
-        .eq("auth_id", authData.user.id)
-        .maybeSingle()
-
-      if (!existingProfile) {
-        const username =
-          authData.user.user_metadata?.username ||
-          authData.user.user_metadata?.full_name ||
-          authData.user.email?.split("@")[0] ||
-          `User_${Math.random().toString(36).substr(2, 8)}`
-
-        const { error: createError } = await supabase.from("users").insert({
-          auth_id: authData.user.id,
-          email: authData.user.email,
-          username: username.substring(0, 20),
-          avatar_url:
-            authData.user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-          avatar_frame: "none",
-          nickname_style: "normal",
-          language: "ru",
-          sound_enabled: true,
-          music_enabled: true,
-          isGuest: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-
-        if (createError) {
-          if (!(createError.code === "23505" || createError.message?.includes("duplicate"))) {
-            throw createError
-          }
-        }
-
-        try {
-          await supabase.from("mastery").insert({
-            user_id: authData.user.id,
-            level: 1,
-            mini_level: 0,
-            fragments: 0,
-            total_wins: 0,
-            created_at: new Date().toISOString(),
-          })
-
-          await supabase.from("glory").insert({
-            user_id: authData.user.id,
-            level: 1,
-            wins: 0,
-            total_glory_wins: 0,
-            created_at: new Date().toISOString(),
-          })
-        } catch {
-        }
-      }
-
-      const session = await supabase.auth.getSession()
-      if (session.data.session) {
-        localStorage.setItem(
-          "brain_battle_session",
-          JSON.stringify({
-            access_token: session.data.session.access_token,
-            refresh_token: session.data.session.refresh_token,
-            expires_at: session.data.session.expires_at,
-          }),
-        )
-        localStorage.setItem("brain_battle_auto_login", "true")
-
-        if (existingProfile?.username) {
-          localStorage.setItem("brain_battle_username", existingProfile.username)
-        }
-      }
-
-      try {
-        const deviceInfo = {
-          user_agent: navigator.userAgent,
-          platform: navigator.platform,
-          is_mobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
-          screen_width: window.screen.width,
-          screen_height: window.screen.height,
-          language: navigator.language,
-          timestamp: new Date().toISOString(),
-        }
-
-        await supabase.from("user_devices").insert({
-          user_id: authData.user.id,
-          device_info: deviceInfo,
-          created_at: new Date().toISOString(),
-        })
-      } catch {
-      }
-
+      // Success - redirect to home
       router.push("/")
+      router.refresh()
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
     } finally {
@@ -146,7 +55,9 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      await signInWithGoogle()
+      await window.location.assign(
+        "https://accounts.google.com/o/oauth2/auth?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_REDIRECT_URI&response_type=code&scope=openid%20email%20profile",
+      )
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Failed to sign in with Google")
       setIsGoogleLoading(false)
@@ -158,12 +69,16 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      const { error } = await signInAsGuest()
+      const { error } = await fetch("/api/auth/guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+
       if (error) throw error
-      
+
       localStorage.setItem("brain_battle_guest_mode", "true")
       localStorage.setItem("brain_battle_auto_login", "true")
-      
+
       router.push("/")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")
@@ -295,7 +210,13 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <div className="mt-4 text-center">
+              <Link href="/auth/reset-password" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+
+            <p className="text-center text-sm text-muted-foreground mt-6">
               {t("auth.noAccount")}{" "}
               <Link href="/auth/sign-up" className="text-primary hover:underline font-medium">
                 {t("auth.signUp")}
