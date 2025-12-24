@@ -7,14 +7,14 @@
 // Экспортируем всё из matchmaking-moves (включая makeMove)
 export * from "./matchmaking-moves"
 
-// Экспортируем core функции поиска/отмены
-export * from "./matchmaking-core"
+// Импортируем и экспортируем core функции поиска/отмены из отдельного файла
+import { findMatch, cancelSearch, type MatchmakingResult, type MatchState } from "./matchmaking-functions"
+
+export { findMatch, cancelSearch }
+export type { MatchmakingResult, MatchState }
 
 // Экспортируем инициализаторы/утилиты для различных типов игр
 export * from "./matchmaking-game-init"
-
-// Явный re-export типов (если нужны в других местах)
-export type { MatchmakingResult, MatchState } from "./matchmaking-core"
 
 // Локальные вспомогательные генераторы (оставлены на месте, экспортируем их тоже).
 // Они используются в matchmaking-game-init, но оставлены здесь на случай прямого импорта.

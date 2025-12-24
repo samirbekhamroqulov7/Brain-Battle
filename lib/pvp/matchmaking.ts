@@ -1,8 +1,6 @@
 "use server"
 
-// Явные, статические экспортa — чтобы сборщик гарантированно видел все экспорты.
-// Экспортируем makeMove и другие серверные функции/типы из соответствующих модулей.
-
+// Явные, статические экспорты — чтобы сборщик гарантированно видел все экспорты.
 import { makeMove as _makeMove } from "./matchmaking-moves"
 import { findMatch as _findMatch, cancelSearch as _cancelSearch } from "./matchmaking-core"
 import {
@@ -12,6 +10,7 @@ import {
   generateAnagramWords as _generateAnagramWords,
 } from "./matchmaking-game-init"
 
+// Переименовываем для избежания конфликтов
 export const makeMove = _makeMove
 export const findMatch = _findMatch
 export const cancelSearch = _cancelSearch
