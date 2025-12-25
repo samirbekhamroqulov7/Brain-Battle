@@ -10,7 +10,7 @@ import { GameButton } from "@/components/ui/game-button"
 import { GameCard } from "@/components/ui/game-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ArrowLeft, Mail, Lock, Loader2, User, AlertCircle } from "lucide-react"
+import { ArrowLeft, Mail, Lock, Loader2, User, AlertCircle, Key } from "lucide-react"
 import Link from "next/link"
 
 export default function LoginPage() {
@@ -22,6 +22,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isGuestLoading, setIsGuestLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  
+  // Добавляем новое состояние для режима входа по коду
+  const [useCodeLogin, setUseCodeLogin] = useState(false)
+  const [code, setCode] = useState("")
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -143,6 +147,139 @@ export default function LoginPage() {
     }
   }
 
+  // Новая функция для отправки кода
+  const sendAuthCode = async () => {
+    if (!email.trim()) {
+      setError("Введите email для отправки кода")
+      return
+    }
+    
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/auth/guest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send code')
+      }
+      
+      // Код успешно отправлен
+      // setUseCodeLogin(true) - уже в режиме кода
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "Не удалось отправить код")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Функция для входа по коду
+  const loginWithCode = async () => {
+    if (!email.trim() || !code.trim() || code.length !== 6) {
+      setError("Введите email и 6-значный код")
+      return
+    }
+    
+    setIsLoading(true)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/auth/guest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Неверный код')
+      }
+      
+      const { session } = await response.json()
+      
+      const supabase = createClient()
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      })
+      
+      if (sessionError) throw sessionError
+      
+      // Создаем или обновляем профиль пользователя
+      const { data: userData } = await supabase.auth.getUser()
+      
+      if (userData.user) {
+        const { data: existingProfile } = await supabase
+          .from("users")
+          .select("*")
+          .eq("auth_id", userData.user.id)
+          .maybeSingle()
+        
+        if (!existingProfile) {
+          const username = userData.user.email?.split("@")[0] || `User_${Math.random().toString(36).substr(2, 8)}`
+          
+          await supabase.from("users").insert({
+            auth_id: userData.user.id,
+            email: userData.user.email,
+            username: username.substring(0, 20),
+            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
+            avatar_frame: "none",
+            nickname_style: "normal",
+            language: "ru",
+            sound_enabled: true,
+            music_enabled: true,
+            isGuest: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+
+          await supabase.from("mastery").insert({
+            user_id: userData.user.id,
+            level: 1,
+            mini_level: 0,
+            fragments: 0,
+            total_wins: 0,
+            created_at: new Date().toISOString(),
+          })
+
+          await supabase.from("glory").insert({
+            user_id: userData.user.id,
+            level: 1,
+            wins: 0,
+            total_glory_wins: 0,
+            created_at: new Date().toISOString(),
+          })
+        }
+        
+        // Сохраняем сессию
+        const session = await supabase.auth.getSession()
+        if (session.data.session) {
+          localStorage.setItem(
+            "brain_battle_session",
+            JSON.stringify({
+              access_token: session.data.session.access_token,
+              refresh_token: session.data.session.refresh_token,
+              expires_at: session.data.session.expires_at,
+            }),
+          )
+          localStorage.setItem("brain_battle_auto_login", "true")
+        }
+      }
+      
+      router.push("/")
+      router.refresh()
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "Ошибка входа")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true)
     setError(null)
@@ -183,53 +320,153 @@ export default function LoginPage() {
           <GameCard variant="elevated" className="p-6">
             <h1 className="text-2xl font-bold text-primary text-center mb-6">{t("auth.login")}</h1>
 
-            <form onSubmit={handleLogin} className="flex flex-col gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-foreground">
-                  {t("auth.email")}
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="email@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 bg-secondary border-border"
-                    required
-                  />
+            {!useCodeLogin ? (
+              <>
+                <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-foreground">
+                      {t("auth.email")}
+                    </Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="email@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 bg-secondary border-border"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-foreground">
+                      {t("auth.password")}
+                    </Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10 bg-secondary border-border"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded">
+                      <AlertCircle className="w-4 h-4 text-destructive" />
+                      <p className="text-sm text-destructive">{error}</p>
+                    </div>
+                  )}
+
+                  <GameButton type="submit" variant="primary" size="md" className="w-full mt-2" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("auth.login")}
+                  </GameButton>
+                </form>
+
+                <div className="text-center mt-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setUseCodeLogin(true)}
+                    className="text-sm text-primary hover:underline"
+                    disabled={isLoading || isGoogleLoading || isGuestLoading}
+                  >
+                    Войти с помощью кода
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-code" className="text-foreground">
+                    {t("auth.email")}
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="email-code"
+                      type="email"
+                      placeholder="email@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="pl-10 bg-secondary border-border"
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="code" className="text-foreground">
+                    6-значный код
+                  </Label>
+                  <div className="relative">
+                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="code"
+                      type="text"
+                      placeholder="123456"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      className="pl-10 bg-secondary border-border"
+                      maxLength={6}
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <GameButton
+                    onClick={sendAuthCode}
+                    variant="secondary"
+                    size="md"
+                    className="flex-1"
+                    disabled={!email.trim() || isLoading}
+                  >
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Отправить код"}
+                  </GameButton>
+                  
+                  <GameButton
+                    onClick={loginWithCode}
+                    variant="primary"
+                    size="md"
+                    className="flex-1"
+                    disabled={!email.trim() || !code.trim() || code.length !== 6 || isLoading}
+                  >
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Войти"}
+                  </GameButton>
+                </div>
+
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded">
+                    <AlertCircle className="w-4 h-4 text-destructive" />
+                    <p className="text-sm text-destructive">{error}</p>
+                  </div>
+                )}
+
+                <div className="text-center">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setUseCodeLogin(false)
+                      setCode("")
+                      setError(null)
+                    }}
+                    className="text-sm text-primary hover:underline"
+                    disabled={isLoading}
+                  >
+                    Войти по паролю
+                  </button>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground">
-                  {t("auth.password")}
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 bg-secondary border-border"
-                    required
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded">
-                  <AlertCircle className="w-4 h-4 text-destructive" />
-                  <p className="text-sm text-destructive">{error}</p>
-                </div>
-              )}
-
-              <GameButton type="submit" variant="primary" size="md" className="w-full mt-2" disabled={isLoading}>
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t("auth.login")}
-              </GameButton>
-            </form>
+            )}
 
             <div className="flex items-center gap-4 my-6">
               <div className="flex-1 h-px bg-border" />

@@ -5,6 +5,7 @@ import { I18nProvider } from "@/lib/i18n/context"
 import { useMusic } from "@/lib/hooks/use-music"
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
+import { SessionRestorer } from "./session-restorer"
 
 function MusicProvider({ children }: { children: ReactNode }) {
   const { playMusic, stopMusic } = useMusic()
@@ -18,25 +19,18 @@ function MusicProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!mounted || typeof window === "undefined") return
 
-    const handleUserInteraction = () => {
-      if (pathname === "/" || pathname === "/auth/login" || pathname === "/auth/sign-up") {
-        playMusic("/music/menu-theme.mp3")
-      } else if (pathname.includes("/classic") || pathname.includes("/pvp")) {
-        playMusic("/music/game-theme.mp3")
-      } else {
-        stopMusic()
-      }
-
-      document.removeEventListener("click", handleUserInteraction)
-      document.removeEventListener("keydown", handleUserInteraction)
-    }
-
-    document.addEventListener("click", handleUserInteraction)
-    document.addEventListener("keydown", handleUserInteraction)
-
-    return () => {
-      document.removeEventListener("click", handleUserInteraction)
-      document.removeEventListener("keydown", handleUserInteraction)
+    const shouldPlayMusic = !pathname.includes("/auth/") && 
+                           !pathname.includes("/api/")
+    
+    if (shouldPlayMusic) {
+      const musicTheme = pathname.includes("/game/") || 
+                        pathname.includes("/pvp/") || 
+                        pathname.includes("/classic/") 
+                        ? "/music/game-theme.mp3" 
+                        : "/music/menu-theme.mp3"
+      playMusic(musicTheme)
+    } else {
+      stopMusic()
     }
   }, [pathname, playMusic, stopMusic, mounted])
 
@@ -54,7 +48,12 @@ function ClientOnlyProviders({ children }: { children: ReactNode }) {
     return <>{children}</>
   }
 
-  return <MusicProvider>{children}</MusicProvider>
+  return (
+    <>
+      <SessionRestorer />
+      <MusicProvider>{children}</MusicProvider>
+    </>
+  )
 }
 
 export function Providers({ children }: { children: ReactNode }) {
