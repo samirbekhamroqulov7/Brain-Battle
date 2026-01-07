@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { GameButton } from "@/components/ui/game-button"
 import { GameCard } from "@/components/ui/game-card"
 import { Gamepad2, Settings, User, Brain } from "lucide-react"
+import { AdSenseBanner } from "@/components/ads/ad-sense-banner"
 
 export default function HomePage() {
   const router = useRouter()
@@ -50,6 +51,10 @@ export default function HomePage() {
         </div>
       </div>
 
+      <div className="max-w-md mx-auto mb-6">
+        <AdSenseBanner slot="home_banner_top" format="horizontal" />
+      </div>
+
       {/* Main Buttons */}
       <div className="max-w-md mx-auto space-y-4 mb-8">
         <GameButton variant="primary" size="lg" className="w-full h-16 text-lg" onClick={() => router.push("/pvp")}>
@@ -89,6 +94,10 @@ export default function HomePage() {
           Challenge players worldwide in 11 unique PvP games. Compete, climb the ranks, and become a Brain Battle
           champion!
         </p>
+      </div>
+
+      <div className="max-w-md mx-auto mt-8">
+        <AdSenseBanner slot="home_banner_bottom" format="horizontal" />
       </div>
     </div>
   )

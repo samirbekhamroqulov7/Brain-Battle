@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Providers } from "@/components/providers"
 import { SessionRestorer } from "@/components/session-restorer"
+import { AdBlockerNotice } from "@/components/ads/ad-blocker-notice"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin", "cyrillic"] })
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
     },
   },
   category: "games",
-    generator: 'v0.app'
+  generator: "v0.app",
 }
 
 export const viewport: Viewport = {
@@ -99,11 +100,29 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-xxxxxxxxxxxxxxxx"
+          crossOrigin="anonymous"
+        />
+        {/* Google Analytics for ad tracking */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'GA_MEASUREMENT_ID');
+          `,
+          }}
+        />
       </head>
       <body className="font-sans antialiased overflow-x-hidden">
         <Providers>
           <SessionRestorer />
           {children}
+          <AdBlockerNotice />
         </Providers>
         <Analytics />
       </body>
